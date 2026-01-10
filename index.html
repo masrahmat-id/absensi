@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Absensi Digital</title>
+    <title>Absensi Digital - Az-Zahro</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
@@ -23,7 +23,6 @@
             overflow-x: hidden;
         }
 
-        /* Notifikasi Melayang yang Akan Hilang */
         #status-kirim {
             position: fixed;
             top: 20px;
@@ -35,7 +34,7 @@
             border-radius: 12px;
             font-weight: bold;
             z-index: 9999;
-            display: none; /* Awalnya tersembunyi */
+            display: none;
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             transition: opacity 0.5s ease;
         }
@@ -60,7 +59,6 @@
             background: black;
         }
 
-        /* Sembunyikan kontrol bawaan library */
         #reader__dashboard, #reader__camera_selection { display: none !important; }
 
         select {
@@ -81,7 +79,7 @@
 
     <div id="status-kirim"></div>
 
-    <h3>ABSENS DIGITAL<br>SMP Islam Az-Zahro & SMK Az-Zahro</h3>
+    <h3>ABSENSI DIGITAL<br>SMP Islam Az-Zahro & SMK Az-Zahro</h3>
     
     <select id="keterangan">
         <option value="●">HADIR</option>
@@ -98,9 +96,11 @@
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwCXbDTuaFkN7GlcXJxaFgDaKPEp2G9vySF1IKfWxUCTuEOCYt39nMmlEmI25pz4PSd/exec';
         let isProcessing = false;
 
+        // Kode Suara Beep Standar (Data URI)
+        const beep = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YV9vT18AZu7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u");
+
         const html5QrCode = new Html5Qrcode("reader");
         
-        // Memulai kamera belakang secara otomatis
         html5QrCode.start(
             { facingMode: "environment" }, 
             { fps: 20, qrbox: 250 }, 
@@ -114,37 +114,35 @@
             const statusDiv = document.getElementById('status-kirim');
             const ket = document.getElementById('keterangan').value;
 
-            // Getaran HP (hanya Android)
+            // Mainkan Suara
+            beep.play().catch(e => console.log("Audio diblokir browser. Klik layar dulu sekali."));
+
+            // Getaran HP
             if (navigator.vibrate) navigator.vibrate(100);
 
-            // Tampilkan Notifikasi "Mengirim"
             statusDiv.innerText = "Mengirim: " + decodedText;
             statusDiv.className = "loading";
             statusDiv.style.display = "block";
             statusDiv.style.opacity = "1";
 
-            // Kirim data ke Google Sheets
             fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ket)}`, {
                 method: 'GET',
                 mode: 'no-cors'
             });
 
-            // LOGIKA PENGHILANGAN NOTIFIKASI
             setTimeout(() => {
-                // Ubah status menjadi Berhasil
                 statusDiv.innerText = "✔ TERKIRIM: " + decodedText;
                 statusDiv.className = "success";
                 
-                // Tunggu 1.5 detik lalu hilangkan notifikasi sepenuhnya
                 setTimeout(() => {
-                    statusDiv.style.opacity = "0"; // Efek memudar
+                    statusDiv.style.opacity = "0";
                     setTimeout(() => {
-                        statusDiv.style.display = "none"; // Benar-benar hilang
-                        isProcessing = false; // Scanner siap lagi
+                        statusDiv.style.display = "none";
+                        isProcessing = false;
                     }, 500); 
                 }, 1500); 
 
-            }, 600); // Jeda singkat untuk efek visual pengiriman
+            }, 600);
         }
     </script>
 </body>
