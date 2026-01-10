@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner Absensi SMP Islam Az-Zahro</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #1a1a1a; color: white; padding: 20px; }
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; border: 4px solid #f39c12; border-radius: 10px; overflow: hidden; }
+        select { width: 100%; max-width: 400px; padding: 12px; margin: 20px 0; background: #333; color: white; border: 1px solid #f39c12; font-size: 16px; }
+        #status-kirim { margin-top: 15px; padding: 10px; border-radius: 5px; display: none; }
+        .success { background: #27ae60; display: block !important; }
+        .loading { background: #e67e22; display: block !important; }
+    </style>
+</head>
+<body>
+    <h3>Absensi Digital SMP Islam Az-Zahro</h3>
+    
+    <select id="keterangan">
+        <option value="Hadir">Hadir</option>
+        <option value="Izin">Izin</option>
+        <option value="Sakit">Sakit</option>
+        <option value="Alpa">Alpa</option>
+    </select>
+
+    <div id="reader"></div>
+    <div id="status-kirim"></div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbymPb3X3Jb_AzVQdhPZ3kq9o3N4ohXZpAnNS5Q5UFcnh1YZxtIpDVnmH5m13XPl-UiU/exec';
+        let isProcessing = false;
+
+        function onScanSuccess(decodedText) {
+            if (isProcessing) return; // Mencegah scan ganda di saat bersamaan
+            
+            isProcessing = true;
+            const statusDiv = document.getElementById('status-kirim');
+            const ket = document.getElementById('keterangan').value;
+
+            statusDiv.innerText = "Mengirim: " + decodedText;
+            statusDiv.className = "loading";
+
+            fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ket)}`)
+            .then(() => {
+                statusDiv.innerText = "BERHASIL: " + decodedText + " (" + ket + ")";
+                statusDiv.className = "success";
+                
+                // Reset untuk scan berikutnya setelah 2 detik
+                setTimeout(() => {
+                    statusDiv.style.display = "none";
+                    isProcessing = false;
+                }, 2000);
+            })
+            .catch(err => {
+                alert("Koneksi Error!");
+                isProcessing = false;
+            });
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+    </script>
+</body>
+</html>
