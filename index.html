@@ -14,58 +14,40 @@
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             text-align: center;
             background-color: var(--dark-bg);
-            color: #ffffff;
+            color: white;
             margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
-        h3 {
-            margin-bottom: 20px;
-            color: var(--primary);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-size: 1.2rem;
-        }
-
-        /* Notifikasi di Atas */
+        /* Notifikasi Melayang di Atas */
         #status-kirim {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
+            width: 85%;
             max-width: 400px;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-weight: bold;
-            z-index: 1000;
+            z-index: 9999;
             display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            animation: slideDown 0.3s ease-out;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
         }
 
-        @keyframes slideDown {
-            from { top: -50px; opacity: 0; }
-            to { top: 20px; opacity: 1; }
-        }
-
-        .success { background-color: var(--success); display: block !important; border: 1px solid #ffffff; }
+        .success { background-color: var(--success); display: block !important; border: 1px solid white; }
         .loading { background-color: var(--primary); display: block !important; }
 
-        /* Area Scanner */
-        .scanner-container {
+        .scanner-box {
             width: 100%;
             max-width: 400px;
+            margin: 0 auto;
             background: var(--card-bg);
-            padding: 15px;
+            padding: 10px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             border: 1px solid #333;
         }
 
@@ -73,38 +55,22 @@
             width: 100%;
             border-radius: 15px;
             overflow: hidden;
-            border: none !important;
-            background: #000;
+            background: black;
         }
 
-        /* Hilangkan elemen bawaan library yang tidak perlu */
-        #reader__dashboard, #reader__camera_selection {
-            display: none !important;
-        }
+        /* Hilangkan UI bawaan library */
+        #reader__dashboard, #reader__camera_selection { display: none !important; }
 
-        /* Dropdown Opsi */
         select {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             padding: 15px;
             margin-bottom: 20px;
             background: var(--card-bg);
             color: white;
             border: 2px solid #333;
-            font-size: 16px;
             border-radius: 12px;
-            outline: none;
-            transition: border 0.3s;
-        }
-
-        select:focus {
-            border-color: var(--primary);
-        }
-
-        .footer {
-            margin-top: 30px;
-            font-size: 0.8rem;
-            color: #666;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -121,73 +87,52 @@
         <option value="Alpa">🔴 ALPA</option>
     </select>
 
-    <div class="scanner-container">
+    <div class="scanner-box">
         <div id="reader"></div>
-    </div>
-
-    <div class="footer">
-        Sistem Absensi Otomatis v2.0
     </div>
 
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbw6xwqQd12anIPZWIwNR7sIU7hhU5xRl-oKIGMclXiTStWhsLA4SBB8Zu88tyATC2Rh/exec';
         let isProcessing = false;
 
-        // Gunakan Html5Qrcode (bukan Scanner) untuk kontrol langsung kamera belakang
         const html5QrCode = new Html5Qrcode("reader");
         
-        const qrConfig = { 
-            fps: 20, 
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0 
-        };
-
-        // Langsung nyalakan kamera belakang (environment)
+        // Langsung aktifkan kamera belakang
         html5QrCode.start(
             { facingMode: "environment" }, 
-            qrConfig, 
+            { fps: 20, qrbox: 250 }, 
             onScanSuccess
-        ).catch(err => {
-            console.error("Gagal akses kamera:", err);
-            alert("Mohon izinkan akses kamera!");
-        });
+        ).catch(err => alert("Aktifkan Izin Kamera!"));
 
         function onScanSuccess(decodedText) {
             if (isProcessing) return; 
-            
             isProcessing = true;
+
             const statusDiv = document.getElementById('status-kirim');
             const ket = document.getElementById('keterangan').value;
 
-            // Efek getar HP saat scan berhasil (jika didukung)
             if (navigator.vibrate) navigator.vibrate(100);
 
+            // UI Langsung berubah (Cepat/Optimis)
             statusDiv.innerText = "Mengirim: " + decodedText;
             statusDiv.className = "loading";
 
+            // Kirim ke Google Sheets
             fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ket)}`, {
                 method: 'GET',
                 mode: 'no-cors'
-            })
-            .then(() => {
-                statusDiv.innerText = "✅ BERHASIL: " + decodedText;
+            });
+
+            // Tampilkan sukses dengan cepat tanpa menunggu server
+            setTimeout(() => {
+                statusDiv.innerText = "✅ TERCATAT: " + decodedText;
                 statusDiv.className = "success";
                 
-                // Sembunyikan notifikasi setelah 3 detik
                 setTimeout(() => {
                     statusDiv.style.display = "none";
                     isProcessing = false;
-                }, 3000);
-            })
-            .catch(err => {
-                statusDiv.innerText = "❌ GAGAL! Cek Koneksi";
-                statusDiv.style.backgroundColor = "#e74c3c";
-                statusDiv.style.display = "block";
-                setTimeout(() => {
-                    statusDiv.style.display = "none";
-                    isProcessing = false;
-                }, 3000);
-            });
+                }, 1500); // Siap scan lagi dalam 1.5 detik
+            }, 600);
         }
     </script>
 </body>
