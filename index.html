@@ -20,9 +20,10 @@
             color: white;
             margin: 0;
             padding: 20px;
+            overflow-x: hidden;
         }
 
-        /* Notifikasi Melayang di Atas */
+        /* Notifikasi Melayang yang Akan Hilang */
         #status-kirim {
             position: fixed;
             top: 20px;
@@ -34,8 +35,9 @@
             border-radius: 12px;
             font-weight: bold;
             z-index: 9999;
-            display: none;
+            display: none; /* Awalnya tersembunyi */
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            transition: opacity 0.5s ease;
         }
 
         .success { background-color: var(--success); display: block !important; border: 1px solid white; }
@@ -58,7 +60,7 @@
             background: black;
         }
 
-        /* Hilangkan UI bawaan library */
+        /* Sembunyikan kontrol bawaan library */
         #reader__dashboard, #reader__camera_selection { display: none !important; }
 
         select {
@@ -71,6 +73,7 @@
             border: 2px solid #333;
             border-radius: 12px;
             font-size: 16px;
+            outline: none;
         }
     </style>
 </head>
@@ -97,12 +100,12 @@
 
         const html5QrCode = new Html5Qrcode("reader");
         
-        // Langsung aktifkan kamera belakang
+        // Memulai kamera belakang secara otomatis
         html5QrCode.start(
             { facingMode: "environment" }, 
             { fps: 20, qrbox: 250 }, 
             onScanSuccess
-        ).catch(err => alert("Aktifkan Izin Kamera!"));
+        ).catch(err => alert("Izin kamera diperlukan!"));
 
         function onScanSuccess(decodedText) {
             if (isProcessing) return; 
@@ -111,28 +114,37 @@
             const statusDiv = document.getElementById('status-kirim');
             const ket = document.getElementById('keterangan').value;
 
+            // Getaran HP (hanya Android)
             if (navigator.vibrate) navigator.vibrate(100);
 
-            // UI Langsung berubah (Cepat/Optimis)
+            // Tampilkan Notifikasi "Mengirim"
             statusDiv.innerText = "Mengirim: " + decodedText;
             statusDiv.className = "loading";
+            statusDiv.style.display = "block";
+            statusDiv.style.opacity = "1";
 
-            // Kirim ke Google Sheets
+            // Kirim data ke Google Sheets
             fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ket)}`, {
                 method: 'GET',
                 mode: 'no-cors'
             });
 
-            // Tampilkan sukses dengan cepat tanpa menunggu server
+            // LOGIKA PENGHILANGAN NOTIFIKASI
             setTimeout(() => {
+                // Ubah status menjadi Berhasil
                 statusDiv.innerText = "✅ TERCATAT: " + decodedText;
                 statusDiv.className = "success";
                 
+                // Tunggu 1.5 detik lalu hilangkan notifikasi sepenuhnya
                 setTimeout(() => {
-                    statusDiv.style.display = "none";
-                    isProcessing = false;
-                }, 1500); // Siap scan lagi dalam 1.5 detik
-            }, 600);
+                    statusDiv.style.opacity = "0"; // Efek memudar
+                    setTimeout(() => {
+                        statusDiv.style.display = "none"; // Benar-benar hilang
+                        isProcessing = false; // Scanner siap lagi
+                    }, 500); 
+                }, 1500); 
+
+            }, 600); // Jeda singkat untuk efek visual pengiriman
         }
     </script>
 </body>
