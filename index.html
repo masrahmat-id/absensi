@@ -92,24 +92,25 @@
         #reader { width: 100%; height: 100%; }
         #reader video { object-fit: cover !important; min-height: 450px; }
 
-        /* Siku Pemindai */
+        /* Siku Pemindai - Disesuaikan dengan QRBox 280px */
         .corner {
             position: absolute; width: 30px; height: 30px;
             border: 5px solid var(--primary); z-index: 20;
         }
-        .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; border-top-left-radius: 10px; }
-        .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; border-top-right-radius: 10px; }
-        .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; border-bottom-left-radius: 10px; }
-        .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; border-bottom-right-radius: 10px; }
+        .top-left { top: 85px; left: calc(50% - 140px); border-right: none; border-bottom: none; border-top-left-radius: 10px; }
+        .top-right { top: 85px; right: calc(50% - 140px); border-left: none; border-bottom: none; border-top-right-radius: 10px; }
+        .bottom-left { bottom: 85px; left: calc(50% - 140px); border-right: none; border-top: none; border-bottom-left-radius: 10px; }
+        .bottom-right { bottom: 85px; right: calc(50% - 140px); border-left: none; border-top: none; border-bottom-right-radius: 10px; }
 
         @keyframes scanAnim {
-            0% { top: 15%; opacity: 0.2; }
-            50% { top: 85%; opacity: 1; }
-            100% { top: 15%; opacity: 0.2; }
+            0% { top: 85px; opacity: 0.2; }
+            50% { top: 365px; opacity: 1; }
+            100% { top: 85px; opacity: 0.2; }
         }
         .scan-line {
-            width: 85%; height: 3px; background: var(--primary);
-            position: absolute; left: 7.5%; z-index: 15;
+            width: 280px; height: 3px; background: var(--primary);
+            position: absolute; left: 50%; transform: translateX(-50%);
+            z-index: 15;
             animation: scanAnim 3s infinite ease-in-out;
             box-shadow: 0 0 20px var(--primary);
         }
@@ -303,7 +304,7 @@
         html5QrCode.start({ facingMode: "environment" }, { 
             fps: 25, 
             qrbox: { width: 280, height: 280 }, 
-            aspectRatio: 0.75 // Dioptimalkan untuk tinggi 450px
+            aspectRatio: 0.75 
         }, 
         (decodedText) => {
             if (isProcessing) return;
