@@ -32,12 +32,9 @@
             margin: 0;
             padding: 20px;
             transition: background 0.3s, color 0.3s;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
-        /* Header Logo Tetap di Atas */
+        /* Header Logo */
         .header-container {
             display: flex;
             align-items: center;
@@ -47,35 +44,60 @@
         }
 
         .header-container img {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             object-fit: contain;
         }
 
         .header-container h3 {
             margin: 0;
-            font-size: 1.1rem;
+            font-size: 1rem;
             line-height: 1.2;
         }
 
-        /* Ikon Pengaturan Pindah ke Pojok Kanan Bawah */
-        .settings-icon {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            font-size: 26px;
-            cursor: pointer;
-            z-index: 1001;
-            background: var(--primary);
-            color: white;
-            padding: 12px;
-            border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        /* Baris Kehadiran & Pengaturan */
+        .controls-row {
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 10px;
+            max-width: 420px;
+            margin: 0 auto 20px auto;
         }
 
+        select {
+            flex-grow: 1;
+            height: 50px;
+            padding: 0 15px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .btn-settings {
+            width: 50px;
+            height: 50px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-settings:active {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Modal */
         #settings-modal {
             display: none;
             position: fixed;
@@ -123,51 +145,58 @@
         #reader { width: 100%; border-radius: 15px; overflow: hidden; background: black; }
         #reader__dashboard, #reader__camera_selection { display: none !important; }
 
-        select, .btn-save {
+        .btn-save {
             width: 100%;
             padding: 12px;
-            margin-top: 10px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            border: 1px solid var(--primary);
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .btn-save {
             background: var(--primary);
             color: white;
             font-weight: bold;
             border: none;
+            border-radius: 8px;
             margin-top: 20px;
             cursor: pointer;
+        }
+
+        .setting-item {
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .setting-item label {
+            font-size: 12px;
+            color: gray;
+            display: block;
+            margin-bottom: 5px;
         }
     </style>
 </head>
 <body data-theme="dark">
 
-    <div class="settings-icon" onclick="toggleSettings()">⚙️</div>
+    <div id="status-kirim"></div>
 
     <div id="settings-modal">
         <h4 style="margin:0 0 15px 0">Pengaturan</h4>
-        <label style="font-size: 12px; color: gray;">Pilih Suara Notifikasi:</label>
-        <select id="sound-choice">
-            <option value="Done.mp3">Done</option>
-            <option value="Mission-success.mp3">Mission Success</option>
-            <option value="Notif01.mp3">Notif 01</option>
-            <option value="Notif02.mp3">Notif 02</option>
-            <option value="Notif03.mp3">Notif 03</option>
-            <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
-            <option value="Yayyy.mp3">Yayyy!</option>
-        </select>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+        
+        <div class="setting-item">
+            <label>Suara Notifikasi:</label>
+            <select id="sound-choice" style="width:100%; border-color:var(--primary);">
+                <option value="Done.mp3">Done</option>
+                <option value="Mission-success.mp3">Mission Success</option>
+                <option value="Notif01.mp3">Notif 01</option>
+                <option value="Notif02.mp3">Notif 02</option>
+                <option value="Notif03.mp3">Notif 03</option>
+                <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
+                <option value="Yayyy.mp3">Yayyy!</option>
+            </select>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; padding: 0 5px;">
             <span style="font-size: 15px;">Mode Terang</span>
             <input type="checkbox" id="theme-toggle" onchange="previewTheme()" style="width:20px; height:20px;">
         </div>
-        <button class="btn-save" onclick="saveSettings()">SIMPAN & TES SUARA</button>
-    </div>
 
-    <div id="status-kirim"></div>
+        <button class="btn-save" onclick="saveSettings()">SIMPAN & TUTUP</button>
+    </div>
 
     <div class="header-container">
         <img src="logo-smp-azzahro.png" alt="Logo SMP">
@@ -175,12 +204,15 @@
         <img src="logo-smk-azzahro.png" alt="Logo SMK">
     </div>
     
-    <select id="keterangan" style="max-width: 420px; margin-bottom: 20px; height: 50px;">
-        <option value="●">HADIR</option>
-        <option value="I">IZIN</option>
-        <option value="S">SAKIT</option>
-        <option value="A">ALPA</option>
-    </select>
+    <div class="controls-row">
+        <select id="keterangan">
+            <option value="●">🟢 HADIR</option>
+            <option value="I">🟡 IZIN</option>
+            <option value="S">🔵 SAKIT</option>
+            <option value="A">🔴 ALPA</option>
+        </select>
+        <div class="btn-settings" onclick="toggleSettings()">☰</div>
+    </div>
 
     <div class="scanner-box">
         <div id="reader"></div>
@@ -213,8 +245,6 @@
             currentTheme = document.getElementById('theme-toggle').checked ? 'light' : 'dark';
             localStorage.setItem('selectedSound', currentSoundFile);
             localStorage.setItem('selectedTheme', currentTheme);
-            
-            // Putar suara sebagai konfirmasi
             new Audio(rawURL + currentSoundFile).play();
             toggleSettings();
         }
@@ -229,16 +259,13 @@
             const statusDiv = document.getElementById('status-kirim');
             const ket = document.getElementById('keterangan').value;
 
-            // Suara & Getar
             new Audio(rawURL + currentSoundFile).play().catch(() => {});
             if (navigator.vibrate) navigator.vibrate(100);
 
-            // Kirim ke Google Sheets
             fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ket)}`, {
                 method: 'GET', mode: 'no-cors'
             });
 
-            // Notifikasi Berhasil
             statusDiv.innerText = "✔ TERKIRIM: " + decodedText;
             statusDiv.style.display = "block";
             statusDiv.style.opacity = "1";
