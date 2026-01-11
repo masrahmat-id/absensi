@@ -89,17 +89,18 @@
             width: 100%; background: var(--bg-card); padding: 8px;
             border-radius: 20px; border: 4px solid var(--primary); position: relative;
             box-sizing: border-box; overflow: hidden;
-            /* Tambahan untuk menyesuaikan tinggi visual */
-            min-height: 280px; 
+            /* TINGGI KOTAK DITINGKATKAN DI SINI */
+            min-height: 380px; 
             display: flex;
             align-items: center;
         }
 
         #reader { width: 100%; border-radius: 12px; overflow: hidden; background: #000; }
         
-        /* Modifikasi video agar mengisi area dengan lebih baik */
         #reader video {
             object-fit: cover !important;
+            /* Memastikan video mengikuti tinggi container */
+            min-height: 380px;
         }
 
         .last-scan-container {
@@ -138,6 +139,18 @@
             z-index: 10001; display: none; background-color: var(--primary);
             color: white; border: 2px solid white; text-align: center; font-weight: bold;
         }
+
+        @keyframes scanAnim {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+        }
+        .scan-line {
+            width: 80%; height: 3px; background-color: var(--primary); 
+            position: absolute; left: 10%; z-index: 10; 
+            animation: scanAnim 3s infinite ease-in-out;
+            box-shadow: 0 0 15px var(--primary);
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -165,7 +178,7 @@
 
         <div class="scanner-box">
             <div id="reader"></div>
-            <div class="scan-line" style="width: 80%; height: 3px; background-color: var(--primary); position: absolute; left: 10%; top: 50%; z-index: 10; animation: scanAnim 3s infinite ease-in-out;"></div>
+            <div class="scan-line"></div>
         </div>
 
         <div class="last-scan-container">
@@ -298,16 +311,15 @@
         applySettings();
         const html5QrCode = new Html5Qrcode("reader");
         
-        // --- PENYESUAIAN TINGGI DAN POSISI KAMERA ---
+        // --- PENYESUAIAN UKURAN SCANNER ---
         html5QrCode.start({ facingMode: "environment" }, { 
             fps: 25, 
-            // Meningkatkan lebar dan tinggi area scan (qrbox) 
-            // serta mengatur posisi agar lebih seimbang
-            qrbox: { width: 280, height: 280 },
-            aspectRatio: 1.0,
-            // Memaksa video untuk mengisi area container
+            // qrbox diperbesar agar sesuai dengan kotak yang ditinggikan
+            qrbox: { width: 300, height: 300 },
+            // Mengubah aspek rasio agar lebih tinggi (Potrait-friendly)
+            aspectRatio: 0.8,
             videoConstraints: {
-                aspectRatio: 1.0
+                aspectRatio: 0.8
             }
         }, (decodedText) => {
             if (isProcessing) return;
