@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2ecc71">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -30,7 +31,13 @@
 
         html, body {
             height: 100%; margin: 0; padding: 0;
-            overflow: hidden; background-color: var(--bg-body);
+            overflow: hidden; 
+            background-color: var(--bg-body);
+            /* KUNCI UTAMA: Mencegah geser layar dan zoom otomatis browser */
+            overscroll-behavior: none;
+            touch-action: none; 
+            position: fixed;
+            width: 100%;
         }
 
         body {
@@ -43,6 +50,8 @@
         .main-app {
             width: 100%; max-width: 400px;
             padding: 0 25px; box-sizing: border-box; text-align: center;
+            /* Mengizinkan sentuhan hanya pada tombol dan kontrol */
+            touch-action: manipulation;
         }
 
         .header-container {
@@ -85,6 +94,8 @@
             padding: 25px; border-radius: 20px; border: 3px solid var(--primary);
             z-index: 10000; width: 90%; max-width: 350px;
             max-height: 85vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            /* Izinkan scroll hanya di dalam modal */
+            touch-action: pan-y;
         }
 
         .modal-header {
@@ -95,8 +106,7 @@
 
         .btn-close-modal {
             background: none; border: none; color: var(--text-main);
-            font-size: 30px; font-weight: bold; cursor: pointer; padding: 0 5px;
-            line-height: 1;
+            font-size: 30px; font-weight: bold; cursor: pointer; line-height: 1;
         }
 
         .setting-item { 
@@ -146,35 +156,12 @@
                 <option value="Yayyy.mp3">Yayyy...!!</option>
             </select>
 
-            <div class="setting-item">
-                <span>Ukuran Logo</span>
-                <input type="range" id="range-logo" min="40" max="110" oninput="previewLayout()">
-            </div>
-
-            <div class="setting-item">
-                <span>Ukuran Tulisan</span>
-                <input type="range" id="range-font" min="0.5" max="1.5" step="0.05" oninput="previewLayout()">
-            </div>
-
-            <div class="setting-item">
-                <span>Warna Tulisan</span>
-                <input type="color" id="color-text" oninput="previewLayout()">
-            </div>
-
-            <div class="setting-item">
-                <span>Warna Latar</span>
-                <input type="color" id="color-bg" oninput="previewLayout()">
-            </div>
-
-            <div class="setting-item">
-                <span>Warna Garis Tema</span>
-                <input type="color" id="color-picker" oninput="previewLayout()">
-            </div>
-
-            <div class="setting-item">
-                <span>Mode Terang</span>
-                <input type="checkbox" id="theme-toggle" onchange="previewLayout()">
-            </div>
+            <div class="setting-item"><span>Ukuran Logo</span><input type="range" id="range-logo" min="40" max="110" oninput="previewLayout()"></div>
+            <div class="setting-item"><span>Ukuran Tulisan</span><input type="range" id="range-font" min="0.5" max="1.5" step="0.05" oninput="previewLayout()"></div>
+            <div class="setting-item"><span>Warna Tulisan</span><input type="color" id="color-text" oninput="previewLayout()"></div>
+            <div class="setting-item"><span>Warna Latar</span><input type="color" id="color-bg" oninput="previewLayout()"></div>
+            <div class="setting-item"><span>Warna Garis Tema</span><input type="color" id="color-picker" oninput="previewLayout()"></div>
+            <div class="setting-item"><span>Mode Terang</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
 
             <button class="btn-save" onclick="saveSettings()">SIMPAN SEMUA</button>
         </div>
@@ -193,20 +180,34 @@
             <div id="reader"></div>
             <div class="scan-line" style="width: 80%; height: 3px; background-color: var(--primary); position: absolute; left: 10%; z-index: 10; animation: scanAnim 3s infinite ease-in-out;"></div>
         </div>
+        
+        <p id="fullscreen-info" style="font-size: 11px; opacity: 0.5; margin-top: 20px;">
+            Ketuk layar untuk mengunci posisi kamera
+        </p>
+    </div>
 
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwCXbDTuaFkN7GlcXJxaFgDaKPEp2G9vySF1IKfWxUCTuEOCYt39nMmlEmI25pz4PSd/exec';
         const rawURL = 'https://github.com/masrahmat-id/absensi/raw/main/';
         let isProcessing = false;
+        let wakeLock = null;
 
-        function activateFullscreen() {
-            const el = document.documentElement;
-            if (el.requestFullscreen) el.requestFullscreen();
-            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        // --- ANTI-MINIMIZE ---
+        async function stayAwake() {
+            try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } catch (err) {}
         }
-        document.addEventListener("click", () => activateFullscreen(), { once: true });
 
-        // Terapkan setingan dari memori
+        function openFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            document.getElementById('fullscreen-info').innerText = "Tampilan Terkunci (Fixed Mode)";
+            stayAwake();
+        }
+
+        document.body.addEventListener('click', openFullscreen, { once: true });
+
+        // --- SETTINGS ---
         function applySettings() {
             const config = JSON.parse(localStorage.getItem('absensiConfig')) || {
                 sound: 'Notif01.mp3', theme: 'dark', primary: '#2ecc71',
@@ -218,7 +219,6 @@
             document.documentElement.style.setProperty('--header-font-size', config.fontSize + 'rem');
             document.documentElement.style.setProperty('--header-text-color', config.textColor);
             document.documentElement.style.setProperty('--bg-body', config.bgColor);
-            
             document.getElementById('sound-choice').value = config.sound;
             document.getElementById('color-picker').value = config.primary;
             document.getElementById('range-logo').value = config.logoSize;
@@ -228,7 +228,6 @@
             document.getElementById('theme-toggle').checked = (config.theme === 'light');
         }
 
-        // Preview saat digeser
         function previewLayout() {
             document.documentElement.style.setProperty('--primary', document.getElementById('color-picker').value);
             document.documentElement.style.setProperty('--logo-size', document.getElementById('range-logo').value + 'px');
@@ -238,13 +237,8 @@
             document.body.setAttribute('data-theme', document.getElementById('theme-toggle').checked ? 'light' : 'dark');
         }
 
-        // Tombol Close (Keluar tanpa simpan)
-        function cancelSettings() {
-            applySettings(); // Kembalikan ke setingan lama
-            toggleSettings();
-        }
-
-        // Simpan Permanen
+        function cancelSettings() { applySettings(); toggleSettings(); }
+        
         function saveSettings() {
             const config = {
                 sound: document.getElementById('sound-choice').value,
@@ -265,6 +259,7 @@
             m.style.display = m.style.display === 'block' ? 'none' : 'block';
         }
 
+        // --- SCANNER ---
         applySettings();
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (decodedText) => {
