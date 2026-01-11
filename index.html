@@ -38,49 +38,34 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             color: var(--text-color);
             transition: all 0.3s ease;
         }
 
-        /* --- HEADER KOP SEJAJAR --- */
-        .header-kop {
-            width: 100%;
-            padding: 20px 10px;
+        /* --- HEADER SIMPEL (TANPA KOP) --- */
+        .header-container {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
-            border-bottom: 4px double var(--primary);
-            background: var(--card-bg);
-            box-sizing: border-box;
             margin-bottom: 25px;
+            width: 100%;
         }
 
-        .header-kop img {
-            width: 65px; /* Ukuran logo disesuaikan agar besar tapi tetap dalam header */
-            height: 65px;
+        .header-container img {
+            width: 60px; /* Ukuran logo tetap besar dan jelas */
+            height: 60px;
             object-fit: contain;
             filter: drop-shadow(0 0 5px var(--primary));
         }
 
-        .header-title {
-            text-align: center;
-        }
-
-        .header-title h2 {
+        .header-container h3 {
             margin: 0;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--primary);
+            font-size: 1rem;
             line-height: 1.2;
-        }
-
-        .header-title p {
-            margin: 3px 0 0 0;
-            font-size: 0.85rem;
-            font-weight: bold;
-            letter-spacing: 0.5px;
+            color: var(--primary);
+            text-align: center;
         }
 
         /* --- MAIN CONTENT --- */
@@ -158,39 +143,36 @@
 
     <div id="status-kirim"></div>
 
-    <div class="header-kop">
-        <img src="logo-smp-azzahro.png" alt="SMP">
-        <div class="header-title">
-            <h2>Absensi Digital</h2>
-            <p>SMP & SMK AZ-ZAHRO</p>
-        </div>
-        <img src="logo-smk-azzahro.png" alt="SMK">
-    </div>
-
-    <div id="settings-modal">
-        <h4 style="margin:0 0 15px 0">⚙ Pengaturan</h4>
-        <label style="font-size: 12px; opacity: 0.6; display:block; text-align:left;">Suara Notifikasi:</label>
-        <select id="sound-choice" style="width:100%; height: 40px; margin-bottom:10px;">
-            <option value="Notif01.mp3">Notif 01</option>
-            <option value="Notif02.mp3">Notif 02</option>
-            <option value="Notif03.mp3">Notif 03</option>
-            <option value="Done.mp3">Done</option>
-            <option value="Mission-success.mp3">Mission Success</option>
-            <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
-            <option value="Yayyy.mp3">Yayyy!</option>
-        </select>
-        <div class="setting-item">
-            <span>Warna Tema</span>
-            <input type="color" id="color-picker" oninput="previewColor()" style="width:40px; height:30px; border:none; background:none;">
-        </div>
-        <div class="setting-item">
-            <span>Mode Terang</span>
-            <input type="checkbox" id="theme-toggle" onchange="previewTheme()">
-        </div>
-        <button class="btn-save" onclick="saveSettings()">SIMPAN & TUTUP</button>
-    </div>
-
     <div class="main-app">
+        <div class="header-container">
+            <img src="logo-smp-azzahro.png" alt="SMP">
+            <h3>ABSENSI DIGITAL<br>SMP & SMK AZ-ZAHRO</h3>
+            <img src="logo-smk-azzahro.png" alt="SMK">
+        </div>
+
+        <div id="settings-modal">
+            <h4 style="margin:0 0 15px 0">⚙ Pengaturan</h4>
+            <label style="font-size: 12px; opacity: 0.6; display:block; text-align:left;">Suara Notifikasi:</label>
+            <select id="sound-choice" style="width:100%; height: 40px; margin-bottom:10px;">
+                <option value="Notif01.mp3">Notif 01</option>
+                <option value="Notif02.mp3">Notif 02</option>
+                <option value="Notif03.mp3">Notif 03</option>
+                <option value="Done.mp3">Done</option>
+                <option value="Mission-success.mp3">Mission Success</option>
+                <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
+                <option value="Yayyy.mp3">Yayyy!</option>
+            </select>
+            <div class="setting-item">
+                <span>Warna Tema</span>
+                <input type="color" id="color-picker" oninput="previewColor()" style="width:40px; height:30px; border:none; background:none;">
+            </div>
+            <div class="setting-item">
+                <span>Mode Terang</span>
+                <input type="checkbox" id="theme-toggle" onchange="previewTheme()">
+            </div>
+            <button class="btn-save" onclick="saveSettings()">SIMPAN & TUTUP</button>
+        </div>
+
         <div class="controls-row">
             <select id="keterangan">
                 <option value="●">🟢 HADIR</option>
@@ -214,6 +196,7 @@
         const rawURL = 'https://github.com/masrahmat-id/absensi/raw/main/';
         let isProcessing = false;
 
+        // --- FULLSCREEN LOGIC ---
         function activateFullscreen() {
             const el = document.documentElement;
             if (el.requestFullscreen) el.requestFullscreen();
@@ -221,6 +204,7 @@
         }
         document.addEventListener("click", () => activateFullscreen(), { once: true });
 
+        // --- SETTINGS LOGIC ---
         let currentSound = localStorage.getItem('selectedSound') || 'Notif01.mp3';
         let currentTheme = localStorage.getItem('selectedTheme') || 'dark';
         let currentColor = localStorage.getItem('selectedColor') || '#2ecc71';
@@ -253,6 +237,7 @@
             toggleSettings();
         }
 
+        // --- SCANNER LOGIC ---
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (decodedText) => {
             if (isProcessing) return;
