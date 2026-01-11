@@ -31,13 +31,9 @@
 
         html, body {
             height: 100%; margin: 0; padding: 0;
-            overflow: hidden; 
-            background-color: var(--bg-body);
-            /* KUNCI UTAMA: Mencegah geser layar dan zoom otomatis browser */
-            overscroll-behavior: none;
-            touch-action: none; 
-            position: fixed;
-            width: 100%;
+            overflow: hidden; background-color: var(--bg-body);
+            overscroll-behavior: none; touch-action: none; 
+            position: fixed; width: 100%;
         }
 
         body {
@@ -50,13 +46,12 @@
         .main-app {
             width: 100%; max-width: 400px;
             padding: 0 25px; box-sizing: border-box; text-align: center;
-            /* Mengizinkan sentuhan hanya pada tombol dan kontrol */
             touch-action: manipulation;
         }
 
         .header-container {
             display: flex; align-items: center; justify-content: center;
-            gap: 15px; margin-bottom: 30px;
+            gap: 15px; margin-bottom: 25px;
         }
 
         .header-container img {
@@ -69,7 +64,7 @@
         }
 
         .controls-row {
-            display: flex; gap: 12px; margin-bottom: 25px;
+            display: flex; gap: 12px; margin-bottom: 12px;
         }
 
         select, .btn-settings {
@@ -77,8 +72,21 @@
             border: 2px solid var(--primary); border-radius: 15px; height: 55px;
         }
 
-        select { flex-grow: 1; padding: 0 15px; font-weight: bold; }
+        select { flex-grow: 1; padding: 0 15px; font-weight: bold; font-size: 16px; }
         .btn-settings { width: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+
+        /* INPUT NAMA TERAKHIR DI SCAN */
+        .last-scan-container {
+            margin-bottom: 20px;
+        }
+
+        #last-name-display {
+            width: 100%; height: 50px; background: var(--bg-card);
+            border: 2px solid var(--primary); border-radius: 12px;
+            color: var(--primary); text-align: center; font-weight: bold;
+            font-size: 18px; box-sizing: border-box; outline: none;
+            letter-spacing: 1px;
+        }
 
         .scanner-box {
             width: 100%; background: var(--bg-card); padding: 10px;
@@ -94,7 +102,6 @@
             padding: 25px; border-radius: 20px; border: 3px solid var(--primary);
             z-index: 10000; width: 90%; max-width: 350px;
             max-height: 85vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            /* Izinkan scroll hanya di dalam modal */
             touch-action: pan-y;
         }
 
@@ -139,6 +146,29 @@
             <img src="logo-smk-azzahro.png" alt="SMK">
         </div>
 
+        <div class="controls-row">
+            <select id="keterangan">
+                <option value="●">🟢 HADIR</option>
+                <option value="I">🟡 IZIN</option>
+                <option value="S">🔵 SAKIT</option>
+                <option value="A">🔴 ALPA</option>
+            </select>
+            <div class="btn-settings" onclick="toggleSettings()">⚙</div>
+        </div>
+
+        <div class="last-scan-container">
+            <input type="text" id="last-name-display" placeholder="Menunggu Scan..." readonly>
+        </div>
+
+        <div class="scanner-box">
+            <div id="reader"></div>
+            <div class="scan-line" style="width: 80%; height: 3px; background-color: var(--primary); position: absolute; left: 10%; z-index: 10; animation: scanAnim 3s infinite ease-in-out;"></div>
+        </div>
+        
+        <p id="fullscreen-info" style="font-size: 11px; opacity: 0.5; margin-top: 15px;">
+            Ketuk layar untuk Fullscreen & Kunci Posisi
+        </p>
+
         <div id="settings-modal">
             <div class="modal-header">
                 <h3 style="margin:0; color:var(--primary);">⚙ Pengaturan</h3>
@@ -165,25 +195,6 @@
 
             <button class="btn-save" onclick="saveSettings()">SIMPAN SEMUA</button>
         </div>
-
-        <div class="controls-row">
-            <select id="keterangan">
-                <option value="●">🟢 HADIR</option>
-                <option value="I">🟡 IZIN</option>
-                <option value="S">🔵 SAKIT</option>
-                <option value="A">🔴 ALPA</option>
-            </select>
-            <div class="btn-settings" onclick="toggleSettings()">⚙</div>
-        </div>
-
-        <div class="scanner-box">
-            <div id="reader"></div>
-            <div class="scan-line" style="width: 80%; height: 3px; background-color: var(--primary); position: absolute; left: 10%; z-index: 10; animation: scanAnim 3s infinite ease-in-out;"></div>
-        </div>
-        
-        <p id="fullscreen-info" style="font-size: 11px; opacity: 0.5; margin-top: 20px;">
-            Ketuk layar untuk mengunci posisi kamera
-        </p>
     </div>
 
     <script>
@@ -192,7 +203,6 @@
         let isProcessing = false;
         let wakeLock = null;
 
-        // --- ANTI-MINIMIZE ---
         async function stayAwake() {
             try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } catch (err) {}
         }
@@ -201,13 +211,11 @@
             const elem = document.documentElement;
             if (elem.requestFullscreen) elem.requestFullscreen();
             else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            document.getElementById('fullscreen-info').innerText = "Tampilan Terkunci (Fixed Mode)";
             stayAwake();
         }
 
         document.body.addEventListener('click', openFullscreen, { once: true });
 
-        // --- SETTINGS ---
         function applySettings() {
             const config = JSON.parse(localStorage.getItem('absensiConfig')) || {
                 sound: 'Notif01.mp3', theme: 'dark', primary: '#2ecc71',
@@ -219,6 +227,7 @@
             document.documentElement.style.setProperty('--header-font-size', config.fontSize + 'rem');
             document.documentElement.style.setProperty('--header-text-color', config.textColor);
             document.documentElement.style.setProperty('--bg-body', config.bgColor);
+            
             document.getElementById('sound-choice').value = config.sound;
             document.getElementById('color-picker').value = config.primary;
             document.getElementById('range-logo').value = config.logoSize;
@@ -259,20 +268,29 @@
             m.style.display = m.style.display === 'block' ? 'none' : 'block';
         }
 
-        // --- SCANNER ---
         applySettings();
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (decodedText) => {
             if (isProcessing) return;
             isProcessing = true;
+            
+            // Tampilkan Nama di Input
+            document.getElementById('last-name-display').value = decodedText;
+            
             const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
             new Audio(rawURL + config.sound).play().catch(() => {});
             if (navigator.vibrate) navigator.vibrate(100);
+
             fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(document.getElementById('keterangan').value)}`, { method: 'GET', mode: 'no-cors' });
+            
             const s = document.getElementById('status-kirim');
             s.innerText = "✔ BERHASIL: " + decodedText;
             s.style.display = "block";
-            setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
+            
+            setTimeout(() => { 
+                s.style.display = "none"; 
+                isProcessing = false; 
+            }, 2000);
         });
     </script>
 </body>
