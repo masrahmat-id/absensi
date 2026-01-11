@@ -14,21 +14,22 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         :root {
+            /* Variabel Utama yang bisa diubah pengguna */
+            --primary: #2ecc71;
+            
+            /* Variabel default Dark Mode */
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-color: #ffffff;
-            --primary: #2ecc71; 
+            --border-color: rgba(255,255,255,0.1);
             --success: #27ae60;
-            --border-color: #333;
         }
 
         [data-theme="light"] {
             --bg-color: #f5f6fa;
             --card-bg: #ffffff;
             --text-color: #2f3640;
-            --primary: #27ae60;
-            --success: #2ecc71;
-            --border-color: #dcdde1;
+            --border-color: rgba(0,0,0,0.1);
         }
 
         body {
@@ -38,63 +39,29 @@
             color: var(--text-color);
             margin: 0;
             padding: 20px;
-            transition: background 0.3s, color 0.3s;
+            transition: all 0.3s ease;
             overflow-x: hidden;
         }
 
-        .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
+        /* Mengubah Header & Judul agar mengikuti warna Primary */
+        h3 {
+            color: var(--primary);
+            filter: brightness(1.2);
         }
 
         .header-container img {
             width: 45px;
             height: 45px;
             object-fit: contain;
+            /* Memberi aura warna primary pada logo */
+            filter: drop-shadow(0 0 5px var(--primary));
         }
 
-        .header-container h3 {
-            margin: 0;
-            font-size: 1rem;
-            line-height: 1.2;
-        }
-
-        .controls-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            max-width: 400px;
-            margin: 0 auto 20px auto;
-        }
-
-        select {
-            flex-grow: 1;
-            height: 50px;
-            padding: 0 15px;
+        .controls-row select, .btn-settings {
             background: var(--card-bg);
             color: var(--text-color);
-            border: 2px solid var(--border-color);
+            border: 2px solid var(--primary) !important; /* Border mengikuti warna tema */
             border-radius: 12px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .btn-settings {
-            width: 50px;
-            height: 50px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .scanner-box {
@@ -104,8 +71,9 @@
             background: var(--card-bg);
             padding: 10px;
             border-radius: 20px;
-            border: 1px solid var(--border-color);
+            border: 3px solid var(--primary); /* Kotak scanner mengikuti warna tema */
             position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
         }
 
         #reader { 
@@ -122,7 +90,7 @@
             position: absolute;
             left: 10%;
             z-index: 10;
-            box-shadow: 0 0 12px var(--primary);
+            box-shadow: 0 0 15px var(--primary);
             animation: scanAnim 2.5s infinite ease-in-out;
             pointer-events: none;
             display: none;
@@ -138,8 +106,6 @@
             display: block;
         }
 
-        #reader__dashboard, #reader__camera_selection { display: none !important; }
-
         #status-kirim {
             position: fixed;
             top: 20px;
@@ -152,9 +118,10 @@
             font-weight: bold;
             z-index: 9999;
             display: none;
-            background-color: var(--success);
+            background-color: var(--primary); /* Notifikasi mengikuti warna tema */
             color: white;
-            border: 1px solid white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            border: 2px solid white;
             transition: opacity 0.5s ease;
         }
 
@@ -167,11 +134,11 @@
             background: var(--card-bg);
             padding: 20px;
             border-radius: 15px;
-            border: 2px solid var(--primary);
+            border: 4px solid var(--primary); /* Modal mengikuti warna tema */
             z-index: 1002;
             width: 85%;
             max-width: 320px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
         }
 
         .setting-item {
@@ -191,22 +158,23 @@
             border-radius: 8px;
             margin-top: 20px;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
 
         .creator-info {
             margin-top: 15px;
             font-size: 10px;
-            color: rgba(128, 128, 128, 0.5);
-            letter-spacing: 0.5px;
+            color: var(--text-color);
+            opacity: 0.5;
         }
 
-        /* Input color styling */
         input[type="color"] {
-            border: none;
-            width: 40px;
-            height: 30px;
+            border: 2px solid var(--border-color);
+            width: 50px;
+            height: 35px;
             cursor: pointer;
             background: none;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -215,10 +183,10 @@
     <div id="status-kirim"></div>
 
     <div id="settings-modal">
-        <h4 style="margin:0 0 15px 0">Pengaturan</h4>
+        <h4 style="margin:0 0 15px 0">Pengaturan Tampilan</h4>
         
         <label style="font-size: 12px; color: gray; display:block; text-align:left;">Suara Notifikasi:</label>
-        <select id="sound-choice" style="width:100%; border-color:var(--primary); margin-bottom:15px;">
+        <select id="sound-choice" style="width:100%; border-color:var(--primary); padding: 5px; border-radius: 5px; background: var(--card-bg); color: var(--text-color);">
             <option value="Notif01.mp3">Notif 01</option>
             <option value="Notif02.mp3">Notif 02</option>
             <option value="Notif03.mp3">Notif 03</option>
@@ -229,8 +197,8 @@
         </select>
 
         <div class="setting-item">
-            <span style="font-size: 15px;">Warna Tema</span>
-            <input type="color" id="color-picker" onchange="previewColor()">
+            <span style="font-size: 15px;">Warna Keseluruhan</span>
+            <input type="color" id="color-picker" oninput="previewColor()">
         </div>
 
         <div class="setting-item">
@@ -238,7 +206,7 @@
             <input type="checkbox" id="theme-toggle" onchange="previewTheme()" style="width:18px; height:18px;">
         </div>
 
-        <button class="btn-save" onclick="saveSettings()">SIMPAN</button>
+        <button class="btn-save" onclick="saveSettings()">TERAPKAN & SIMPAN</button>
         <div class="creator-info">Created by ops: Rahmattullah</div>
     </div>
 
@@ -249,7 +217,7 @@
     </div>
     
     <div class="controls-row">
-        <select id="keterangan">
+        <select id="keterangan" style="height: 50px; font-size: 16px;">
             <option value="●">🟢 HADIR</option>
             <option value="I">🟡 IZIN</option>
             <option value="S">🔵 SAKIT</option>
@@ -264,17 +232,6 @@
     </div>
 
     <script>
-        // PWA Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('SW Registered!', reg);
-                }).catch(err => {
-                    console.log('SW Registration Failed', err);
-                });
-            });
-        }
-
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwCXbDTuaFkN7GlcXJxaFgDaKPEp2G9vySF1IKfWxUCTuEOCYt39nMmlEmI25pz4PSd/exec';
         const rawURL = 'https://github.com/masrahmat-id/absensi/raw/main/';
         let isProcessing = false;
@@ -296,7 +253,7 @@
             modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
         }
 
-        // Preview Warna Kustom
+        // Preview Warna Real-time
         function previewColor() {
             const newColor = document.getElementById('color-picker').value;
             document.documentElement.style.setProperty('--primary', newColor);
@@ -316,7 +273,7 @@
             localStorage.setItem('selectedTheme', currentTheme);
             localStorage.setItem('selectedColor', currentPrimaryColor);
             
-            new Audio(rawURL + currentSoundFile).play();
+            new Audio(rawURL + currentSoundFile).play().catch(() => {});
             toggleSettings();
         }
 
