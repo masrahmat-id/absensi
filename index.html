@@ -29,91 +29,73 @@
         }
 
         html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: var(--bg-body);
+            height: 100%; margin: 0; padding: 0;
+            overflow: hidden; background-color: var(--bg-body);
         }
 
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-main);
-            transition: background-color 0.4s ease;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: var(--text-main); transition: background-color 0.4s ease;
         }
 
         .main-app {
-            width: 100%;
-            max-width: 400px;
-            padding: 0 25px;
-            box-sizing: border-box;
-            text-align: center;
+            width: 100%; max-width: 400px;
+            padding: 0 25px; box-sizing: border-box; text-align: center;
         }
 
         .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 15px; margin-bottom: 30px;
         }
 
         .header-container img {
-            width: var(--logo-size);
-            height: var(--logo-size);
-            object-fit: contain;
+            width: var(--logo-size); height: var(--logo-size); object-fit: contain;
         }
 
         .header-container h3 {
-            margin: 0;
-            font-size: var(--header-font-size);
-            line-height: 1.1;
-            color: var(--header-text-color);
-            font-weight: 800;
+            margin: 0; font-size: var(--header-font-size);
+            line-height: 1.1; color: var(--header-text-color); font-weight: 800;
         }
 
         .controls-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 25px;
+            display: flex; gap: 12px; margin-bottom: 25px;
         }
 
         select, .btn-settings {
-            background: var(--bg-card);
-            color: var(--text-main);
-            border: 2px solid var(--primary);
-            border-radius: 15px;
-            height: 55px;
+            background: var(--bg-card); color: var(--text-main);
+            border: 2px solid var(--primary); border-radius: 15px; height: 55px;
         }
 
         select { flex-grow: 1; padding: 0 15px; font-weight: bold; }
         .btn-settings { width: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
         .scanner-box {
-            width: 100%;
-            background: var(--bg-card);
-            padding: 10px;
-            border-radius: 25px;
-            border: 4px solid var(--primary);
-            position: relative;
+            width: 100%; background: var(--bg-card); padding: 10px;
+            border-radius: 25px; border: 4px solid var(--primary); position: relative;
         }
 
         #reader { width: 100%; border-radius: 18px; overflow: hidden; background: #000; }
 
+        /* --- MODAL SETTINGS DENGAN TOMBOL CLOSE --- */
         #settings-modal {
-            display: none; 
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); 
-            background: var(--bg-card);
-            padding: 20px; border-radius: 20px; 
-            border: 3px solid var(--primary);
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); background: var(--bg-card);
+            padding: 25px; border-radius: 20px; border: 3px solid var(--primary);
             z-index: 10000; width: 90%; max-width: 350px;
-            max-height: 85vh; overflow-y: auto;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        .btn-close-modal {
+            background: none; border: none; color: var(--text-main);
+            font-size: 24px; font-weight: bold; cursor: pointer; padding: 0 5px;
         }
 
         .setting-item { 
@@ -122,11 +104,9 @@
         }
 
         .btn-save { 
-            width: 100%; padding: 15px; 
-            background: var(--primary); 
-            color: white; font-weight: bold; 
-            border: none; border-radius: 12px; 
-            margin-top: 20px; cursor: pointer;
+            width: 100%; padding: 15px; background: var(--primary); 
+            color: white; font-weight: bold; border: none; 
+            border-radius: 12px; margin-top: 25px; cursor: pointer;
         }
 
         #status-kirim {
@@ -149,10 +129,13 @@
         </div>
 
         <div id="settings-modal">
-            <h3 style="margin-top:0; color:var(--primary); text-align: center;">⚙ Pengaturan</h3>
+            <div class="modal-header">
+                <h3 style="margin:0; color:var(--primary);">⚙ Pengaturan</h3>
+                <button class="btn-close-modal" onclick="toggleSettings()">×</button>
+            </div>
             
-            <label style="font-size: 11px; opacity: 0.6; display:block; margin-top:10px;">PILIH SUARA NOTIFIKASI:</label>
-            <select id="sound-choice" style="width:100%; height: 40px; margin-bottom:10px;">
+            <label style="font-size: 11px; opacity: 0.6; display:block;">PILIH SUARA NOTIFIKASI:</label>
+            <select id="sound-choice" style="width:100%; height: 40px; margin-bottom:10px; border-radius: 8px;">
                 <option value="Notif01.mp3">Notif 01</option>
                 <option value="Notif02.mp3">Notif 02</option>
                 <option value="Notif03.mp3">Notif 03</option>
