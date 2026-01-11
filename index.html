@@ -79,7 +79,6 @@
         select { flex-grow: 1; padding: 0 15px; font-weight: bold; font-size: 16px; }
         .btn-settings { width: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 
-        /* SCANNER CONTAINER */
         .scanner-box {
             width: 100%; background: #000; padding: 0;
             border-radius: 20px; border: 4px solid var(--primary); position: relative;
@@ -88,10 +87,9 @@
         }
 
         #reader { width: 100%; height: 100%; }
-        
         #reader video { object-fit: cover !important; min-height: 380px; }
 
-        /* SIKU KAMERA (CORNERS) */
+        /* SIKU KAMERA */
         .corner {
             position: absolute; width: 30px; height: 30px;
             border: 5px solid var(--primary); z-index: 20;
@@ -101,7 +99,6 @@
         .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
         .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
 
-        /* ANIMASI GARIS SCAN */
         @keyframes scanAnim {
             0% { top: 15%; opacity: 0.2; }
             50% { top: 85%; opacity: 1; }
@@ -136,7 +133,7 @@
             margin-bottom: 20px; border-bottom: 1px solid var(--primary); padding-bottom: 10px;
         }
 
-        .btn-close-modal { background: none; border: none; color: var(--text-main); font-size: 30px; cursor: pointer; }
+        .btn-close-modal { background: none; border: none; color: var(--text-main); font-size: 30px; font-weight: bold; cursor: pointer; line-height: 1; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
         .btn-save { width: 100%; padding: 15px; background: var(--primary); color: white; font-weight: bold; border: none; border-radius: 12px; margin-top: 25px; cursor: pointer; }
 
@@ -176,7 +173,6 @@
             <div class="corner top-right"></div>
             <div class="corner bottom-left"></div>
             <div class="corner bottom-right"></div>
-            
             <div class="scan-line"></div>
             <div id="reader"></div>
         </div>
@@ -194,6 +190,7 @@
                 <h3 style="margin:0; color:var(--primary);">⚙ Pengaturan</h3>
                 <button class="btn-close-modal" onclick="cancelSettings()">×</button>
             </div>
+            
             <label style="font-size: 11px; opacity: 0.6; display:block;">SUARA NOTIFIKASI:</label>
             <select id="sound-choice" style="width:100%; height: 40px; margin-bottom:10px; border-radius: 8px;">
                 <option value="Notif01.mp3">Notif 01</option>
@@ -204,12 +201,14 @@
                 <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
                 <option value="Yayyy.mp3">Yayyy...!!</option>
             </select>
+
             <div class="setting-item"><span>Ukuran Logo</span><input type="range" id="range-logo" min="40" max="110" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Ukuran Tulisan</span><input type="range" id="range-font" min="0.5" max="1.5" step="0.05" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Warna Tulisan</span><input type="color" id="color-text" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Warna Latar</span><input type="color" id="color-bg" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Warna Garis Tema</span><input type="color" id="color-picker" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Mode Terang</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
+
             <button class="btn-save" onclick="saveSettings()">SIMPAN SEMUA</button>
         </div>
     </div>
@@ -275,6 +274,12 @@
             m.style.display = m.style.display === 'block' ? 'none' : 'block';
         }
 
+        // FUNGSI CLOSE / CANCEL
+        function cancelSettings() { 
+            applySettings(); // Mengembalikan tampilan ke setting yang tersimpan
+            toggleSettings(); // Menutup modal
+        }
+
         function saveSettings() {
             const config = {
                 sound: document.getElementById('sound-choice').value,
@@ -291,35 +296,21 @@
         }
 
         applySettings();
-        
         const html5QrCode = new Html5Qrcode("reader");
-        
-        // MEMULAI KAMERA BELAKANG DENGAN SIKU DAN TINGGI BARU
-        html5QrCode.start(
-            { facingMode: "environment" }, // MEMAKSA KAMERA BELAKANG
-            { 
-                fps: 25, 
-                qrbox: { width: 280, height: 280 },
-                aspectRatio: 0.8 // Membuat tampilan lebih tinggi
-            }, 
+        html5QrCode.start({ facingMode: "environment" }, { fps: 25, qrbox: { width: 280, height: 280 }, aspectRatio: 0.8 }, 
             (decodedText) => {
                 if (isProcessing) return;
                 isProcessing = true;
                 document.getElementById('last-name-display').value = decodedText;
                 const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
                 new Audio(rawURL + config.sound).play().catch(() => {});
-                if (navigator.vibrate) navigator.vibrate(100);
-                
                 fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(document.getElementById('keterangan').value)}`, { method: 'GET', mode: 'no-cors' });
-                
                 const s = document.getElementById('status-kirim');
                 s.innerText = "✔ TERKIRIM: " + decodedText;
                 s.style.display = "block";
                 setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
             }
-        ).catch(err => {
-            console.error("Gagal memulai kamera: ", err);
-        });
+        ).catch(err => console.error(err));
     </script>
 </body>
 </html>
