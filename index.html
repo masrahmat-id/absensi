@@ -12,17 +12,24 @@
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
+        /* Variabel Dasar */
         :root {
             --primary: #2ecc71;
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #ffffff;
+            /* Default Dark Mode */
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #ffffff;
+            --text-sub: #aaaaaa;
+            --border-ui: rgba(255,255,255,0.1);
         }
 
+        /* Variabel Light Mode */
         [data-theme="light"] {
-            --bg-color: #f5f6fa;
-            --card-bg: #ffffff;
-            --text-color: #2f3640;
+            --bg-body: #f0f2f5;
+            --bg-card: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #666666;
+            --border-ui: rgba(0,0,0,0.1);
         }
 
         html, body {
@@ -30,113 +37,133 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: var(--bg-color);
+            background-color: var(--bg-body);
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: var(--text-color);
-            transition: all 0.3s ease;
+            color: var(--text-main);
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* --- HEADER SIMPEL (TANPA KOP) --- */
+        .main-app {
+            width: 100%;
+            max-width: 400px;
+            padding: 0 25px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* Header Layout */
         .header-container {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 25px;
-            width: 100%;
+            margin-bottom: 30px;
         }
 
         .header-container img {
-            width: 60px; /* Ukuran logo tetap besar dan jelas */
-            height: 60px;
+            width: 65px;
+            height: 65px;
             object-fit: contain;
-            filter: drop-shadow(0 0 5px var(--primary));
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
         }
 
         .header-container h3 {
             margin: 0;
-            font-size: 1rem;
+            font-size: 1.1rem;
             line-height: 1.2;
             color: var(--primary);
-            text-align: center;
+            font-weight: 800;
         }
 
-        /* --- MAIN CONTENT --- */
-        .main-app {
-            width: 100%;
-            max-width: 400px;
-            padding: 0 20px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
+        /* Controls */
         .controls-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 25px;
         }
 
         select, .btn-settings {
-            background: var(--card-bg);
-            color: var(--text-color);
+            background: var(--bg-card);
+            color: var(--text-main);
             border: 2px solid var(--primary);
-            border-radius: 12px;
-            height: 50px;
+            border-radius: 15px;
+            height: 55px;
             font-size: 16px;
-            outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        select { flex-grow: 1; padding: 0 10px; font-weight: bold; }
-        .btn-settings { width: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        select { flex-grow: 1; padding: 0 15px; font-weight: bold; cursor: pointer; }
+        .btn-settings { width: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
+        /* Scanner Area */
         .scanner-box {
             width: 100%;
-            background: var(--card-bg);
-            padding: 8px;
-            border-radius: 20px;
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 25px;
             border: 4px solid var(--primary);
             position: relative;
             box-sizing: border-box;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         }
 
-        #reader { width: 100%; border-radius: 15px; overflow: hidden; background: black; }
+        #reader { width: 100%; border-radius: 18px; overflow: hidden; background: #000; }
 
         .scan-line {
             width: 80%; height: 3px; background-color: var(--primary);
             position: absolute; left: 10%; z-index: 10;
             box-shadow: 0 0 15px var(--primary);
-            animation: scanAnim 2.5s infinite ease-in-out;
+            animation: scanAnim 3s infinite ease-in-out;
             display: none;
         }
 
-        @keyframes scanAnim { 0% { top: 20%; } 50% { top: 80%; } 100% { top: 20%; } }
+        @keyframes scanAnim { 0%, 100% { top: 25%; } 50% { top: 75%; } }
         #reader:not(:empty) + .scan-line { display: block; }
 
-        /* --- STATUS & MODAL --- */
-        #status-kirim {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            width: 80%; padding: 15px; border-radius: 12px;
-            z-index: 9999; display: none; background-color: var(--primary);
-            color: white; border: 2px solid white; text-align: center; font-weight: bold;
-        }
-
+        /* Settings Modal */
         #settings-modal {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); background: var(--card-bg);
-            padding: 20px; border-radius: 15px; border: 4px solid var(--primary);
-            z-index: 1002; width: 85%; max-width: 320px;
+            display: none; 
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); 
+            background: var(--bg-card);
+            padding: 25px; border-radius: 20px; 
+            border: 3px solid var(--primary);
+            z-index: 10000; width: 85%; max-width: 320px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-        .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; font-weight: bold; border: none; border-radius: 8px; margin-top: 20px; }
+        .setting-item { 
+            display: flex; justify-content: space-between; 
+            align-items: center; margin-top: 20px;
+            font-weight: 500;
+        }
+
+        .btn-save { 
+            width: 100%; padding: 15px; 
+            background: var(--primary); 
+            color: white; font-weight: bold; 
+            border: none; border-radius: 12px; 
+            margin-top: 25px; cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Status Toast */
+        #status-kirim {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+            width: 80%; padding: 15px; border-radius: 15px;
+            z-index: 10001; display: none; background-color: var(--primary);
+            color: white; border: 2px solid white; text-align: center; font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        input[type="checkbox"] { transform: scale(1.5); accent-color: var(--primary); }
     </style>
 </head>
 <body data-theme="dark">
@@ -146,30 +173,33 @@
     <div class="main-app">
         <div class="header-container">
             <img src="logo-smp-azzahro.png" alt="SMP">
-            <h3>ABSENSI DIGITAL<br>SMP & SMK AZ-ZAHRO</h3>
+            <h3>ABSENSI DIGITAL<br>SMP ISLAM AZ-ZAHRO<br>SMK AZ-ZAHRO</h3>
             <img src="logo-smk-azzahro.png" alt="SMK">
         </div>
 
         <div id="settings-modal">
-            <h4 style="margin:0 0 15px 0">⚙ Pengaturan</h4>
-            <label style="font-size: 12px; opacity: 0.6; display:block; text-align:left;">Suara Notifikasi:</label>
-            <select id="sound-choice" style="width:100%; height: 40px; margin-bottom:10px;">
+            <h3 style="margin-top:0; color:var(--primary)">Pengaturan</h3>
+            
+            <label style="font-size: 12px; opacity: 0.6; display:block; text-align:left;">Pilih Suara:</label>
+            <select id="sound-choice" style="width:100%; height: 45px; margin-bottom:15px; border-radius: 8px;">
                 <option value="Notif01.mp3">Notif 01</option>
                 <option value="Notif02.mp3">Notif 02</option>
                 <option value="Notif03.mp3">Notif 03</option>
                 <option value="Done.mp3">Done</option>
                 <option value="Mission-success.mp3">Mission Success</option>
                 <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
-                <option value="Yayyy.mp3">Yayyy!</option>
             </select>
+
             <div class="setting-item">
                 <span>Warna Tema</span>
-                <input type="color" id="color-picker" oninput="previewColor()" style="width:40px; height:30px; border:none; background:none;">
+                <input type="color" id="color-picker" oninput="previewColor()" style="width:45px; height:35px; border:none; background:none;">
             </div>
+
             <div class="setting-item">
                 <span>Mode Terang</span>
                 <input type="checkbox" id="theme-toggle" onchange="previewTheme()">
             </div>
+
             <button class="btn-save" onclick="saveSettings()">SIMPAN & TUTUP</button>
         </div>
 
@@ -180,7 +210,7 @@
                 <option value="S">🔵 SAKIT</option>
                 <option value="A">🔴 ALPA</option>
             </select>
-            <div class="btn-settings" onclick="toggleSettings()">☰</div>
+            <div class="btn-settings" onclick="toggleSettings()">⚙</div>
         </div>
 
         <div class="scanner-box">
@@ -188,7 +218,9 @@
             <div class="scan-line"></div>
         </div>
         
-        <p style="font-size: 10px; opacity: 0.3; margin-top: 15px;">Sentuh layar untuk Fullscreen Total</p>
+        <p style="font-size: 11px; opacity: 0.5; margin-top: 20px;">
+            Klik layar untuk Fullscreen (Tanpa Bar Sinyal)
+        </p>
     </div>
 
     <script>
@@ -196,7 +228,7 @@
         const rawURL = 'https://github.com/masrahmat-id/absensi/raw/main/';
         let isProcessing = false;
 
-        // --- FULLSCREEN LOGIC ---
+        // --- 1. LOGIKA FULLSCREEN ---
         function activateFullscreen() {
             const el = document.documentElement;
             if (el.requestFullscreen) el.requestFullscreen();
@@ -204,55 +236,75 @@
         }
         document.addEventListener("click", () => activateFullscreen(), { once: true });
 
-        // --- SETTINGS LOGIC ---
+        // --- 2. LOGIKA TEMA (DARK/LIGHT) ---
         let currentSound = localStorage.getItem('selectedSound') || 'Notif01.mp3';
         let currentTheme = localStorage.getItem('selectedTheme') || 'dark';
         let currentColor = localStorage.getItem('selectedColor') || '#2ecc71';
 
-        document.body.setAttribute('data-theme', currentTheme);
-        document.documentElement.style.setProperty('--primary', currentColor);
-        document.getElementById('sound-choice').value = currentSound;
-        document.getElementById('color-picker').value = currentColor;
-        document.getElementById('theme-toggle').checked = (currentTheme === 'light');
+        // Terapkan saat aplikasi dibuka
+        function applySavedSettings() {
+            document.body.setAttribute('data-theme', currentTheme);
+            document.documentElement.style.setProperty('--primary', currentColor);
+            document.getElementById('sound-choice').value = currentSound;
+            document.getElementById('color-picker').value = currentColor;
+            document.getElementById('theme-toggle').checked = (currentTheme === 'light');
+        }
+        applySavedSettings();
 
         function toggleSettings() {
             const m = document.getElementById('settings-modal');
             m.style.display = m.style.display === 'block' ? 'none' : 'block';
         }
 
+        // Preview langsung saat digeser/klik (Tanpa simpan dulu)
         function previewColor() {
             document.documentElement.style.setProperty('--primary', document.getElementById('color-picker').value);
         }
 
         function previewTheme() {
-            document.body.setAttribute('data-theme', document.getElementById('theme-toggle').checked ? 'light' : 'dark');
+            const isLight = document.getElementById('theme-toggle').checked;
+            document.body.setAttribute('data-theme', isLight ? 'light' : 'dark');
         }
 
+        // Simpan permanen ke Memori HP
         function saveSettings() {
             currentSound = document.getElementById('sound-choice').value;
+            currentTheme = document.getElementById('theme-toggle').checked ? 'light' : 'dark';
+            currentColor = document.getElementById('color-picker').value;
+
             localStorage.setItem('selectedSound', currentSound);
-            localStorage.setItem('selectedTheme', document.getElementById('theme-toggle').checked ? 'light' : 'dark');
-            localStorage.setItem('selectedColor', document.getElementById('color-picker').value);
+            localStorage.setItem('selectedTheme', currentTheme);
+            localStorage.setItem('selectedColor', currentColor);
+            
+            // Tes suara saat simpan
             new Audio(rawURL + currentSound).play().catch(() => {});
             toggleSettings();
         }
 
-        // --- SCANNER LOGIC ---
+        // --- 3. LOGIKA SCANNER ---
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (decodedText) => {
             if (isProcessing) return;
             isProcessing = true;
+            
+            // Notifikasi Suara & Getar
             new Audio(rawURL + currentSound).play().catch(() => {});
             if (navigator.vibrate) navigator.vibrate(100);
 
+            // Kirim ke Google Sheets
             fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(document.getElementById('keterangan').value)}`, { 
                 method: 'GET', mode: 'no-cors' 
             });
 
+            // Tampilkan Feedback
             const s = document.getElementById('status-kirim');
-            s.innerText = "✔ TERKIRIM: " + decodedText;
+            s.innerText = "✔ BERHASIL: " + decodedText;
             s.style.display = "block";
-            setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
+            
+            setTimeout(() => {
+                s.style.display = "none";
+                isProcessing = false;
+            }, 2000);
         });
     </script>
 </body>
