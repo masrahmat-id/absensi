@@ -46,7 +46,6 @@
         .main-app {
             width: 100%; max-width: 400px;
             padding: 0 20px; box-sizing: border-box; text-align: center;
-            touch-action: manipulation;
             display: flex; flex-direction: column; height: 100%;
             justify-content: center;
         }
@@ -66,16 +65,11 @@
         }
 
         .datetime-display {
-            margin-bottom: 10px;
-            font-weight: bold;
-            font-size: 14px;
-            color: var(--text-main);
-            letter-spacing: 0.5px;
+            margin-bottom: 10px; font-weight: bold; font-size: 14px;
+            color: var(--text-main); letter-spacing: 0.5px;
         }
 
-        .controls-row {
-            display: flex; gap: 10px; margin-bottom: 15px;
-        }
+        .controls-row { display: flex; gap: 10px; margin-bottom: 15px; }
 
         select, .btn-settings {
             background: var(--bg-card); color: var(--text-main);
@@ -85,28 +79,42 @@
         select { flex-grow: 1; padding: 0 15px; font-weight: bold; font-size: 16px; }
         .btn-settings { width: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 
+        /* SCANNER CONTAINER */
         .scanner-box {
-            width: 100%; background: var(--bg-card); padding: 8px;
+            width: 100%; background: #000; padding: 0;
             border-radius: 20px; border: 4px solid var(--primary); position: relative;
             box-sizing: border-box; overflow: hidden;
-            /* TINGGI KOTAK DITINGKATKAN DI SINI */
-            min-height: 380px; 
-            display: flex;
-            align-items: center;
+            min-height: 380px; display: flex; align-items: center;
         }
 
-        #reader { width: 100%; border-radius: 12px; overflow: hidden; background: #000; }
+        #reader { width: 100%; height: 100%; }
         
-        #reader video {
-            object-fit: cover !important;
-            /* Memastikan video mengikuti tinggi container */
-            min-height: 380px;
+        #reader video { object-fit: cover !important; min-height: 380px; }
+
+        /* SIKU KAMERA (CORNERS) */
+        .corner {
+            position: absolute; width: 30px; height: 30px;
+            border: 5px solid var(--primary); z-index: 20;
+        }
+        .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+        .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+        .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+        .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+
+        /* ANIMASI GARIS SCAN */
+        @keyframes scanAnim {
+            0% { top: 15%; opacity: 0.2; }
+            50% { top: 85%; opacity: 1; }
+            100% { top: 15%; opacity: 0.2; }
+        }
+        .scan-line {
+            width: 80%; height: 2px; background: var(--primary);
+            position: absolute; left: 10%; z-index: 15;
+            animation: scanAnim 2.5s infinite ease-in-out;
+            box-shadow: 0 0 15px var(--primary);
         }
 
-        .last-scan-container {
-            margin-top: 15px;
-            width: 100%;
-        }
+        .last-scan-container { margin-top: 15px; width: 100%; }
 
         #last-name-display {
             width: 100%; height: 55px; background: var(--bg-card);
@@ -121,7 +129,6 @@
             padding: 25px; border-radius: 20px; border: 3px solid var(--primary);
             z-index: 10000; width: 90%; max-width: 350px;
             max-height: 85vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            touch-action: pan-y;
         }
 
         .modal-header {
@@ -129,7 +136,7 @@
             margin-bottom: 20px; border-bottom: 1px solid var(--primary); padding-bottom: 10px;
         }
 
-        .btn-close-modal { background: none; border: none; color: var(--text-main); font-size: 30px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .btn-close-modal { background: none; border: none; color: var(--text-main); font-size: 30px; cursor: pointer; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
         .btn-save { width: 100%; padding: 15px; background: var(--primary); color: white; font-weight: bold; border: none; border-radius: 12px; margin-top: 25px; cursor: pointer; }
 
@@ -138,18 +145,6 @@
             width: 80%; padding: 15px; border-radius: 15px;
             z-index: 10001; display: none; background-color: var(--primary);
             color: white; border: 2px solid white; text-align: center; font-weight: bold;
-        }
-
-        @keyframes scanAnim {
-            0% { top: 10%; }
-            50% { top: 90%; }
-            100% { top: 10%; }
-        }
-        .scan-line {
-            width: 80%; height: 3px; background-color: var(--primary); 
-            position: absolute; left: 10%; z-index: 10; 
-            animation: scanAnim 3s infinite ease-in-out;
-            box-shadow: 0 0 15px var(--primary);
         }
     </style>
 </head>
@@ -177,8 +172,13 @@
         </div>
 
         <div class="scanner-box">
-            <div id="reader"></div>
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+            
             <div class="scan-line"></div>
+            <div id="reader"></div>
         </div>
 
         <div class="last-scan-container">
@@ -194,7 +194,6 @@
                 <h3 style="margin:0; color:var(--primary);">⚙ Pengaturan</h3>
                 <button class="btn-close-modal" onclick="cancelSettings()">×</button>
             </div>
-            
             <label style="font-size: 11px; opacity: 0.6; display:block;">SUARA NOTIFIKASI:</label>
             <select id="sound-choice" style="width:100%; height: 40px; margin-bottom:10px; border-radius: 8px;">
                 <option value="Notif01.mp3">Notif 01</option>
@@ -205,14 +204,12 @@
                 <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
                 <option value="Yayyy.mp3">Yayyy...!!</option>
             </select>
-
             <div class="setting-item"><span>Ukuran Logo</span><input type="range" id="range-logo" min="40" max="110" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Ukuran Tulisan</span><input type="range" id="range-font" min="0.5" max="1.5" step="0.05" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Warna Tulisan</span><input type="color" id="color-text" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Warna Latar</span><input type="color" id="color-bg" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Warna Garis Tema</span><input type="color" id="color-picker" oninput="previewLayout()"></div>
             <div class="setting-item"><span>Mode Terang</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
-
             <button class="btn-save" onclick="saveSettings()">SIMPAN SEMUA</button>
         </div>
     </div>
@@ -227,21 +224,10 @@
             const now = new Date();
             const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-            
-            const dayName = days[now.getDay()];
-            const dayDate = now.getDate();
-            const monthName = months[now.getMonth()];
-            const year = now.getFullYear();
-            
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-
             document.getElementById('clock-display').innerText = 
-                `${dayName}, ${dayDate} ${monthName} ${year} | ${hours}:${minutes}:${seconds}`;
+                `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} | ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateClock, 1000); updateClock();
 
         async function stayAwake() { 
             try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } catch (err) {} 
@@ -249,11 +235,8 @@
 
         function openFullscreen() {
             const elem = document.documentElement;
-            const info = document.getElementById('fullscreen-info');
             if (elem.requestFullscreen) elem.requestFullscreen();
-            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            info.innerText = "Tampilan Terkunci (Fixed Mode)";
-            info.style.opacity = "0.7";
+            document.getElementById('fullscreen-info').innerText = "Tampilan Terkunci (Fixed Mode)";
             stayAwake();
         }
         document.body.addEventListener('click', openFullscreen, { once: true });
@@ -287,7 +270,11 @@
             document.body.setAttribute('data-theme', document.getElementById('theme-toggle').checked ? 'light' : 'dark');
         }
 
-        function cancelSettings() { applySettings(); toggleSettings(); }
+        function toggleSettings() {
+            const m = document.getElementById('settings-modal');
+            m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        }
+
         function saveSettings() {
             const config = {
                 sound: document.getElementById('sound-choice').value,
@@ -303,36 +290,35 @@
             toggleSettings();
         }
 
-        function toggleSettings() {
-            const m = document.getElementById('settings-modal');
-            m.style.display = m.style.display === 'block' ? 'none' : 'block';
-        }
-
         applySettings();
+        
         const html5QrCode = new Html5Qrcode("reader");
         
-        // --- PENYESUAIAN UKURAN SCANNER ---
-        html5QrCode.start({ facingMode: "environment" }, { 
-            fps: 25, 
-            // qrbox diperbesar agar sesuai dengan kotak yang ditinggikan
-            qrbox: { width: 300, height: 300 },
-            // Mengubah aspek rasio agar lebih tinggi (Potrait-friendly)
-            aspectRatio: 0.8,
-            videoConstraints: {
-                aspectRatio: 0.8
+        // MEMULAI KAMERA BELAKANG DENGAN SIKU DAN TINGGI BARU
+        html5QrCode.start(
+            { facingMode: "environment" }, // MEMAKSA KAMERA BELAKANG
+            { 
+                fps: 25, 
+                qrbox: { width: 280, height: 280 },
+                aspectRatio: 0.8 // Membuat tampilan lebih tinggi
+            }, 
+            (decodedText) => {
+                if (isProcessing) return;
+                isProcessing = true;
+                document.getElementById('last-name-display').value = decodedText;
+                const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
+                new Audio(rawURL + config.sound).play().catch(() => {});
+                if (navigator.vibrate) navigator.vibrate(100);
+                
+                fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(document.getElementById('keterangan').value)}`, { method: 'GET', mode: 'no-cors' });
+                
+                const s = document.getElementById('status-kirim');
+                s.innerText = "✔ TERKIRIM: " + decodedText;
+                s.style.display = "block";
+                setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
             }
-        }, (decodedText) => {
-            if (isProcessing) return;
-            isProcessing = true;
-            document.getElementById('last-name-display').value = decodedText;
-            const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
-            new Audio(rawURL + config.sound).play().catch(() => {});
-            if (navigator.vibrate) navigator.vibrate(100);
-            fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(document.getElementById('keterangan').value)}`, { method: 'GET', mode: 'no-cors' });
-            const s = document.getElementById('status-kirim');
-            s.innerText = "✔ TERKIRIM: " + decodedText;
-            s.style.display = "block";
-            setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
+        ).catch(err => {
+            console.error("Gagal memulai kamera: ", err);
         });
     </script>
 </body>
