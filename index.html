@@ -42,46 +42,45 @@
             transition: all 0.3s ease;
         }
 
-        /* --- KOP LOGO SECTION --- */
-        .kop-header {
+        /* --- HEADER KOP SEJAJAR --- */
+        .header-kop {
             width: 100%;
-            padding: 25px 15px 15px 15px;
+            padding: 20px 10px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            border-bottom: 3px double var(--primary); /* Garis kop khas surat */
-            background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent);
-            margin-bottom: 20px;
-        }
-
-        .logo-row {
-            display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 30px; /* Jarak antar logo besar */
-            margin-bottom: 10px;
+            gap: 15px;
+            border-bottom: 4px double var(--primary);
+            background: var(--card-bg);
+            box-sizing: border-box;
+            margin-bottom: 25px;
         }
 
-        .logo-row img {
-            width: 85px; /* Logo diperbesar */
-            height: 85px;
+        .header-kop img {
+            width: 65px; /* Ukuran logo disesuaikan agar besar tapi tetap dalam header */
+            height: 65px;
             object-fit: contain;
-            filter: drop-shadow(0 0 8px var(--primary));
+            filter: drop-shadow(0 0 5px var(--primary));
         }
 
-        .kop-text h2 {
+        .header-title {
+            text-align: center;
+        }
+
+        .header-title h2 {
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--primary);
-            text-transform: uppercase;
+            line-height: 1.2;
         }
 
-        .kop-text p {
-            margin: 2px 0 0 0;
-            font-size: 0.8rem;
-            opacity: 0.8;
+        .header-title p {
+            margin: 3px 0 0 0;
+            font-size: 0.85rem;
             font-weight: bold;
+            letter-spacing: 0.5px;
         }
 
         /* --- MAIN CONTENT --- */
@@ -141,8 +140,7 @@
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             width: 80%; padding: 15px; border-radius: 12px;
             z-index: 9999; display: none; background-color: var(--primary);
-            color: white; border: 2px solid white; text-align: center;
-            font-weight: bold;
+            color: white; border: 2px solid white; text-align: center; font-weight: bold;
         }
 
         #settings-modal {
@@ -160,15 +158,13 @@
 
     <div id="status-kirim"></div>
 
-    <div class="kop-header">
-        <div class="logo-row">
-            <img src="logo-smp-azzahro.png" alt="SMP">
-            <img src="logo-smk-azzahro.png" alt="SMK">
-        </div>
-        <div class="kop-text">
+    <div class="header-kop">
+        <img src="logo-smp-azzahro.png" alt="SMP">
+        <div class="header-title">
             <h2>Absensi Digital</h2>
             <p>SMP & SMK AZ-ZAHRO</p>
         </div>
+        <img src="logo-smk-azzahro.png" alt="SMK">
     </div>
 
     <div id="settings-modal">
@@ -210,7 +206,7 @@
             <div class="scan-line"></div>
         </div>
         
-        <p style="font-size: 10px; opacity: 0.3; margin-top: 15px;">Sentuh layar untuk Fullscreen Immersive</p>
+        <p style="font-size: 10px; opacity: 0.3; margin-top: 15px;">Sentuh layar untuk Fullscreen Total</p>
     </div>
 
     <script>
@@ -218,7 +214,6 @@
         const rawURL = 'https://github.com/masrahmat-id/absensi/raw/main/';
         let isProcessing = false;
 
-        // --- FULLSCREEN ---
         function activateFullscreen() {
             const el = document.documentElement;
             if (el.requestFullscreen) el.requestFullscreen();
@@ -226,7 +221,6 @@
         }
         document.addEventListener("click", () => activateFullscreen(), { once: true });
 
-        // --- SETTINGS ---
         let currentSound = localStorage.getItem('selectedSound') || 'Notif01.mp3';
         let currentTheme = localStorage.getItem('selectedTheme') || 'dark';
         let currentColor = localStorage.getItem('selectedColor') || '#2ecc71';
@@ -259,7 +253,6 @@
             toggleSettings();
         }
 
-        // --- SCANNER ---
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (decodedText) => {
             if (isProcessing) return;
