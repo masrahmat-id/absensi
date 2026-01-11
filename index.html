@@ -7,7 +7,6 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
-            /* Palette Mode Gelap (Default) */
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-color: #ffffff;
@@ -17,7 +16,6 @@
         }
 
         [data-theme="light"] {
-            /* Palette Mode Terang */
             --bg-color: #f5f6fa;
             --card-bg: #ffffff;
             --text-color: #2f3640;
@@ -34,6 +32,27 @@
             margin: 0;
             padding: 20px;
             transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header dengan Logo */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header-container img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .header-container h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.2;
         }
 
         .settings-icon {
@@ -62,7 +81,6 @@
             width: 85%;
             max-width: 320px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            color: var(--text-color);
         }
 
         #status-kirim {
@@ -77,11 +95,10 @@
             font-weight: bold;
             z-index: 9999;
             display: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            transition: opacity 0.5s ease;
             background-color: var(--success);
             color: white;
             border: 1px solid white;
+            transition: opacity 0.5s ease;
         }
 
         .scanner-box {
@@ -92,7 +109,6 @@
             padding: 10px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         #reader { width: 100%; border-radius: 15px; overflow: hidden; background: black; }
@@ -106,24 +122,14 @@
             color: var(--text-color);
             border: 1px solid var(--primary);
             border-radius: 8px;
-            font-size: 14px;
         }
 
         .btn-save {
             background: var(--primary);
             color: white;
             font-weight: bold;
-            cursor: pointer;
             border: none;
             margin-top: 20px;
-        }
-
-        .toggle-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            padding: 0 5px;
         }
     </style>
 </head>
@@ -132,9 +138,8 @@
     <div class="settings-icon" onclick="toggleSettings()">⚙️</div>
 
     <div id="settings-modal">
-        <h4 style="margin-top:0">Pengaturan</h4>
-        
-        <label style="font-size: 12px; color: gray;">Pilih Notifikasi Suara:</label>
+        <h4 style="margin:0 0 15px 0">Pengaturan</h4>
+        <label style="font-size: 12px; color: gray;">Pilih Suara:</label>
         <select id="sound-choice">
             <option value="Done.mp3">Done</option>
             <option value="Mission-success.mp3">Mission Success</option>
@@ -144,18 +149,20 @@
             <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
             <option value="Yayyy.mp3">Yayyy!</option>
         </select>
-
-        <div class="toggle-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
             <span style="font-size: 14px;">Mode Terang</span>
             <input type="checkbox" id="theme-toggle" onchange="previewTheme()">
         </div>
-
         <button class="btn-save" onclick="saveSettings()">SIMPAN</button>
     </div>
 
     <div id="status-kirim"></div>
 
-    <h3>ABSENSI DIGITAL<br>SMP & SMK Az-Zahro</h3>
+    <div class="header-container">
+        <img src="logo-smp-azzahro.png" alt="Logo SMP">
+        <h3>ABSENSI DIGITAL<br>SMP & SMK Az-Zahro</h3>
+        <img src="logo-smk-azzahro.png" alt="Logo SMK">
+    </div>
     
     <select id="keterangan" style="max-width: 420px; margin-bottom: 20px;">
         <option value="●">HADIR</option>
@@ -173,7 +180,6 @@
         const rawURL = 'https://github.com/masrahmat-id/absensi/raw/main/';
         let isProcessing = false;
 
-        // Load Pengaturan dari LocalStorage
         let currentSoundFile = localStorage.getItem('selectedSound') || 'Notif01.mp3';
         let currentTheme = localStorage.getItem('selectedTheme') || 'dark';
         
@@ -193,15 +199,10 @@
 
         function saveSettings() {
             currentSoundFile = document.getElementById('sound-choice').value;
-            const isLight = document.getElementById('theme-toggle').checked;
-            currentTheme = isLight ? 'light' : 'dark';
-
+            currentTheme = document.getElementById('theme-toggle').checked ? 'light' : 'dark';
             localStorage.setItem('selectedSound', currentSoundFile);
             localStorage.setItem('selectedTheme', currentTheme);
-            
-            const testAudio = new Audio(rawURL + currentSoundFile);
-            testAudio.play();
-            
+            new Audio(rawURL + currentSoundFile).play();
             toggleSettings();
         }
 
@@ -215,18 +216,13 @@
             const statusDiv = document.getElementById('status-kirim');
             const ket = document.getElementById('keterangan').value;
 
-            // Suara & Getar Instan
-            const audio = new Audio(rawURL + currentSoundFile);
-            audio.play().catch(() => {});
+            new Audio(rawURL + currentSoundFile).play().catch(() => {});
             if (navigator.vibrate) navigator.vibrate(100);
 
-            // Kirim data (Tanpa notifikasi "Mengirim" berwarna oranye)
             fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ket)}`, {
-                method: 'GET',
-                mode: 'no-cors'
+                method: 'GET', mode: 'no-cors'
             });
 
-            // Tampilkan Notifikasi Berhasil (Langsung Hijau)
             statusDiv.innerText = "✔ TERKIRIM: " + decodedText;
             statusDiv.style.display = "block";
             statusDiv.style.opacity = "1";
