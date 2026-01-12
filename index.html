@@ -339,18 +339,41 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
         applySettings();
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 25, qrbox: { width: 280, height: 280 }, aspectRatio: 0.75 }, 
-        (decodedText) => {
-            if (isProcessing) return;
-            isProcessing = true;
-            document.getElementById('last-name-display').value = decodedText;
-            const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
-            new Audio(rawURL + config.sound).play().catch(() => {});
-            fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(document.getElementById('keterangan').value)}`, { method: 'GET', mode: 'no-cors' });
-            const s = document.getElementById('status-kirim');
-            s.innerText = "✔ TERKIRIM: " + decodedText;
-            s.style.display = "block";
-            setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
-        }).catch(err => console.error(err));
+(decodedText) => {
+    if (isProcessing) return;
+
+    // --- VALIDASI KETERANGAN ---
+    const ketValue = document.getElementById('keterangan').value;
+    if (!ketValue || ketValue === "") {
+        const s = document.getElementById('status-kirim');
+        s.innerText = "🗙 GAGAL: PILIH KETERANGAN DULU!";
+        s.style.backgroundColor = "#e74c3c"; // Warna merah untuk error
+        s.style.display = "block";
+        
+        // Mainkan suara peringatan jika perlu (opsional)
+        new Audio('error-sound.mp3').play().catch(() => {});
+
+        setTimeout(() => { 
+            s.style.display = "none"; 
+            s.style.backgroundColor = "var(--primary)"; // Kembalikan ke warna asli
+        }, 2000);
+        return; // Berhenti di sini, jangan kirim data
+    }
+    // ---------------------------
+
+    isProcessing = true;
+    document.getElementById('last-name-display').value = decodedText;
+    const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
+    new Audio(rawURL + config.sound).play().catch(() => {});
+    
+    // Kirim data hanya jika lolos validasi di atas
+    fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ketValue)}`, { method: 'GET', mode: 'no-cors' });
+    
+    const s = document.getElementById('status-kirim');
+    s.innerText = "✔ TERKIRIM: " + decodedText;
+    s.style.display = "block";
+    setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
+    }).catch(err => console.error(err));
     </script>
 
     <script>
