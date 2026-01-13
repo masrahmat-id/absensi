@@ -2,147 +2,361 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>5 Game Baru Offline</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pusat Game Offline Az-Zahro</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #10b981; --text: #f8fafc; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; text-align: center; touch-action: manipulation; }
-        .container { padding: 15px; max-width: 450px; margin: auto; min-height: 100vh; }
-        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; }
-        .card { background: var(--card); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; }
-        .card span { font-size: 24px; }
-        .screen { display: none; }
-        .active { display: block; }
-        #game-area { background: #1e293b; border-radius: 15px; padding: 20px; min-height: 300px; position: relative; border: 2px solid var(--accent); }
-        .btn-back { margin-top: 20px; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold; }
-        input { width: 80%; padding: 12px; font-size: 20px; border-radius: 8px; text-align: center; }
-        .grid-color { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .color-box { height: 70px; border-radius: 8px; cursor: pointer; }
+        /* CSS Dasar Tetap dari Kode Asli Anda */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background: #0f172a; font-family: 'Segoe UI', sans-serif; color: #fff;
+            padding-top: env(safe-area-inset-top);
+        }
+
+        #main-container {
+            width: 100%; height: 100%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+
+        h1 { font-size: 24px; color: #38bdf8; margin: 0 0 10px 0; }
+        .menu-selection { margin-bottom: 15px; display: flex; gap: 10px; }
+        select { padding: 8px; border-radius: 5px; background: #1e293b; color: white; border: 1px solid #38bdf8; }
+
+        /* Navigation Menu Utama */
+        #game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .menu-card { background: #1e293b; padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
+        .menu-card:active { border-color: #38bdf8; transform: scale(0.95); }
+        .menu-card span { font-size: 40px; display: block; margin-bottom: 10px; }
+
+        /* Game Screens */
+        .game-screen { display: none; flex-direction: column; align-items: center; width: 100%; }
+        .active { display: flex; }
+
+        /* Tic Tac Toe Board (Kode Asli Anda) */
+        .board { 
+            display: grid; grid-template-columns: repeat(3, 85px); grid-template-rows: repeat(3, 85px); 
+            gap: 10px; background: #1e293b; padding: 15px; border-radius: 15px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .cell { background: #334155; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 35px; font-weight: bold; cursor: pointer; }
+        .cell.x-color { color: #38bdf8; }
+        .cell.o-color { color: #fb7185; }
+        #winning-line { position: absolute; background: #f43f5e; display: none; z-index: 10; border-radius: 10px; box-shadow: 0 0 15px #f43f5e; pointer-events: none; }
+
+        /* Snake & Mole Canvas */
+        canvas { background: #1e293b; border-radius: 15px; border: 2px solid #334155; max-width: 90vw; }
+
+        /* Math Quiz Box */
+        .math-box { background: #1e293b; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #38bdf8; }
+        #math-q { font-size: 40px; margin-bottom: 20px; }
+        #math-ans { width: 100px; padding: 10px; font-size: 24px; border-radius: 8px; border: none; text-align: center; }
+
+        /* Global UI Elements */
+        .status { margin-top: 15px; font-size: 16px; color: #94a3b8; height: 20px; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        button { padding: 10px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-back { background: #ef4444; color: white; width: 80%; max-width: 300px; margin-top: 20px; }
+        .btn-reset { background: #334155; color: white; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="menu-screen" class="screen active">
-        <h2>🎮 5 Game Baru</h2>
-        <div class="menu-grid">
-            <div class="card" onclick="startWord()">Menebak Kata (Hangman) <span>🔤</span></div>
-            <div class="card" onclick="startSimon()">Simon Says (Ingatan) <span>🔴</span></div>
-            <div class="card" onclick="startTower()">Susun Menara <span>🏢</span></div>
-            <div class="card" onclick="startDiff()">Cari Warna Beda <span>🎨</span></div>
-            <div class="card" onclick="startFast()">Tes Reaksi ⚡ <span>⏱️</span></div>
+    <div id="main-container">
+        
+        <div id="game-menu" class="active game-screen" style="display: grid;">
+            <h1 style="grid-column: span 2; text-align: center;">OFFLINE GAMES</h1>
+            <div class="menu-card" onclick="showGame('ttt')"><span>❌⭕</span>Tic Tac Toe</div>
+            <div class="menu-card" onclick="showGame('snake')"><span>🐍</span>Snake</div>
+            <div class="menu-card" onclick="showGame('math')"><span>➕</span>Math Quiz</div>
+            <div class="menu-card" onclick="showGame('mole')"><span>🔨</span>Whack Mole</div>
+            <button class="btn-reset" style="grid-column: span 2;" onclick="window.location.reload()">Cek Koneksi</button>
         </div>
-        <button class="btn-back" style="background:#0ea5e9" onclick="window.location.reload()">Cek Koneksi</button>
+
+        <div id="screen-ttt" class="game-screen">
+            <h1>TIC TAC TOE</h1>
+            <div class="menu-selection">
+                <label>Level: </label>
+                <select id="difficulty" onchange="resetGame()">
+                    <option value="easy" selected>Mudah</option>
+                    <option value="medium">Sedang</option>
+                    <option value="hard">Sulit</option>
+                    <option value="impossible">Mustahil 😂</option>
+                </select>
+            </div>
+            <div class="board" id="board">
+                <div id="winning-line"></div>
+                <div class="cell" onclick="makeMove(0)"></div><div class="cell" onclick="makeMove(1)"></div><div class="cell" onclick="makeMove(2)"></div>
+                <div class="cell" onclick="makeMove(3)"></div><div class="cell" onclick="makeMove(4)"></div><div class="cell" onclick="makeMove(5)"></div>
+                <div class="cell" onclick="makeMove(6)"></div><div class="cell" onclick="makeMove(7)"></div><div class="cell" onclick="makeMove(8)"></div>
+            </div>
+            <div class="status" id="status">Giliran Kamu</div>
+            <div class="btn-group">
+                <button class="btn-reset" onclick="resetGame()">Ulang</button>
+                <button class="btn-back" onclick="goToMenu()">Menu Utama</button>
+            </div>
+        </div>
+
+        <div id="screen-snake" class="game-screen">
+            <h1>SNAKE</h1>
+            <div class="menu-selection">
+                <label>Kecepatan: </label>
+                <select id="snake-level" onchange="initSnake()">
+                    <option value="200">Santai</option>
+                    <option value="150" selected>Normal</option>
+                    <option value="80">Cepat</option>
+                    <option value="40">Kilat!</option>
+                </select>
+            </div>
+            <canvas id="snakeCanvas" width="300" height="300"></canvas>
+            <div class="status" id="snake-status">Gunakan Geser/Klik Layar</div>
+            <button class="btn-back" onclick="goToMenu()">Menu Utama</button>
+        </div>
+
+        <div id="screen-math" class="game-screen">
+            <h1>MATH QUIZ</h1>
+            <div class="menu-selection">
+                <label>Tingkat: </label>
+                <select id="math-level" onchange="nextMath()">
+                    <option value="10">Anak-anak</option>
+                    <option value="50" selected>Sedang</option>
+                    <option value="200">Jenius</option>
+                </select>
+            </div>
+            <div class="math-box">
+                <div id="math-q">0 + 0</div>
+                <input type="number" id="math-ans" placeholder="?">
+            </div>
+            <div class="status" id="math-status">Skor: 0</div>
+            <button class="btn-back" onclick="goToMenu()">Menu Utama</button>
+        </div>
+
+        <div id="screen-mole" class="game-screen">
+            <h1>WHACK A MOLE</h1>
+            <div class="menu-selection">
+                <label>Level: </label>
+                <select id="mole-level">
+                    <option value="1000">Mudah</option>
+                    <option value="700" selected>Sedang</option>
+                    <option value="400">Pro</option>
+                </select>
+            </div>
+            <canvas id="moleCanvas" width="300" height="300"></canvas>
+            <div class="status" id="mole-status">Skor: 0</div>
+            <button class="btn-back" onclick="goToMenu()">Menu Utama</button>
+        </div>
+
     </div>
 
-    <div id="game-screen" class="screen">
-        <h3 id="game-title">Game</h3>
-        <p>Skor: <span id="score">0</span></p>
-        <div id="game-area"></div>
-        <button class="btn-back" onclick="location.reload()">Kembali ke Menu</button>
-    </div>
-</div>
+    <script>
+        /* --- NAVIGASI --- */
+        function showGame(id) {
+            document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
+            const target = document.getElementById('screen-' + id);
+            target.classList.add('active');
+            target.style.display = 'flex';
+            document.getElementById('game-menu').style.display = 'none';
 
-<script>
-    let score = 0;
-    const area = document.getElementById('game-area');
-    const scoreVal = document.getElementById('score');
+            if(id === 'snake') initSnake();
+            if(id === 'math') nextMath();
+            if(id === 'mole') initMole();
+        }
 
-    function openG(t) {
-        document.getElementById('menu-screen').classList.remove('active');
-        document.getElementById('game-screen').classList.add('active');
-        document.getElementById('game-title').innerText = t;
-        score = 0; scoreVal.innerText = 0;
-    }
+        function goToMenu() { location.reload(); }
 
-    // 1. MENEBAK KATA (HANGMAN)
-    function startWord() {
-        openG("Menebak Kata");
-        const words = ["ABSENSI", "OFFLINE", "APPINVENTOR", "GITHUB", "KARYAWAN"];
-        let target = words[Math.floor(Math.random()*words.length)];
-        let guessed = [];
-        function update() {
-            let display = target.split('').map(l => guessed.includes(l) ? l : "_").join(" ");
-            area.innerHTML = `<h1>${display}</h1><input type="text" id="inp" maxlength="1" placeholder="Ketik 1 Huruf">`;
-            if(!display.includes("_")) { alert("Hebat!"); location.reload(); }
-            document.getElementById('inp').oninput = function() {
-                let char = this.value.toUpperCase();
-                if(char && !guessed.includes(char)) { guessed.push(char); if(target.includes(char)) score += 10; scoreVal.innerText = score; update(); }
+        /* --- 1. LOGIKA TIC TAC TOE (ASLI ANDA - TIDAK DIUBAH) --- */
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let huPlayer = "X"; let aiPlayer = "O"; let gameActive = true;
+        const winConditions = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+        const lineStyles = [[50,15,280,6,0], [152,15,280,6,0], [254,15,280,6,0], [15,50,6,280,0], [15,152,6,280,0], [15,254,6,280,0], [25,25,370,6,45], [25,285,370,6,135]];
+
+        function makeMove(idx) {
+            if (board[idx] === "" && gameActive) {
+                board[idx] = huPlayer; updateDisplay();
+                if (!checkWin(board, huPlayer) && !checkTie()) { setTimeout(aiMove, 400); } 
+                else { checkGameStatus(); }
+            }
+        }
+
+        function aiMove() {
+            const diff = document.getElementById('difficulty').value;
+            let move; let rand = Math.random();
+            if (diff === "easy") move = randomMove();
+            else if (diff === "medium") move = (rand < 0.5) ? minimax(board, aiPlayer).index : randomMove();
+            else if (diff === "hard") move = (rand < 0.9) ? minimax(board, aiPlayer).index : randomMove();
+            else move = minimax(board, aiPlayer).index;
+            board[move] = aiPlayer; updateDisplay(); checkGameStatus();
+        }
+
+        function randomMove() {
+            let avail = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+            return avail[Math.floor(Math.random() * avail.length)];
+        }
+
+        function minimax(newBoard, player) {
+            let availSpots = newBoard.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+            if (checkWin(newBoard, huPlayer)) return {score: -10};
+            if (checkWin(newBoard, aiPlayer)) return {score: 10};
+            if (availSpots.length === 0) return {score: 0};
+            let moves = [];
+            for (let i = 0; i < availSpots.length; i++) {
+                let move = {}; move.index = availSpots[i];
+                newBoard[availSpots[i]] = player;
+                if (player === aiPlayer) move.score = minimax(newBoard, huPlayer).score;
+                else move.score = minimax(newBoard, aiPlayer).score;
+                newBoard[availSpots[i]] = ""; moves.push(move);
+            }
+            let bestMove;
+            if (player === aiPlayer) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < moves.length; i++) { if (moves[i].score > bestScore) { bestScore = moves[i].score; bestMove = i; } }
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < moves.length; i++) { if (moves[i].score < bestScore) { bestScore = moves[i].score; bestMove = i; } }
+            }
+            return moves[bestMove];
+        }
+
+        function checkWin(b, p) {
+            for (let i = 0; i < winConditions.length; i++) {
+                if (b[winConditions[i][0]] === p && b[winConditions[i][1]] === p && b[winConditions[i][2]] === p) return {index: i, player: p};
+            }
+            return null;
+        }
+
+        function checkTie() { return board.filter(s => s === "").length === 0; }
+
+        function checkGameStatus() {
+            let win = checkWin(board, huPlayer) || checkWin(board, aiPlayer);
+            if (win) {
+                document.getElementById('status').innerText = win.player === "X" ? "Kamu Menang!" : "Komputer Menang!";
+                const line = document.getElementById('winning-line');
+                const [top, left, w, h, deg] = lineStyles[win.index];
+                line.style.top = top+"px"; line.style.left = left+"px"; line.style.width = w+"px"; line.style.height = h+"px";
+                line.style.transform = `rotate(${deg}deg)`; line.style.transformOrigin = "top left"; line.style.display = "block";
+                gameActive = false;
+            } else if (checkTie()) {
+                document.getElementById('status').innerText = "Seri!"; gameActive = false;
+            }
+        }
+
+        function updateDisplay() {
+            const cells = document.querySelectorAll('.cell');
+            board.forEach((val, i) => {
+                cells[i].innerText = val;
+                cells[i].className = val === "X" ? "cell x-color" : (val === "O" ? "cell o-color" : "cell");
+            });
+        }
+
+        function resetGame() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true; document.getElementById('winning-line').style.display = "none";
+            document.getElementById('status').innerText = "Giliran Kamu"; updateDisplay();
+        }
+
+        /* --- 2. LOGIKA SNAKE --- */
+        let snake, food, snakeDir, snakeScore, snakeLoop;
+        function initSnake() {
+            clearInterval(snakeLoop);
+            const canvas = document.getElementById('snakeCanvas');
+            const ctx = canvas.getContext('2d');
+            const box = 20;
+            snake = [{x: 8*box, y: 8*box}]; food = {x: 4*box, y: 4*box};
+            snakeDir = "RIGHT"; snakeScore = 0;
+            const speed = document.getElementById('snake-level').value;
+
+            // Kontrol (Keyboard & Tap)
+            document.onkeydown = (e) => {
+                if(e.key === "ArrowUp" && snakeDir !== "DOWN") snakeDir = "UP";
+                if(e.key === "ArrowDown" && snakeDir !== "UP") snakeDir = "DOWN";
+                if(e.key === "ArrowLeft" && snakeDir !== "RIGHT") snakeDir = "LEFT";
+                if(e.key === "ArrowRight" && snakeDir !== "LEFT") snakeDir = "RIGHT";
             };
+
+            snakeLoop = setInterval(() => {
+                ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,300,300);
+                for(let i=0; i<snake.length; i++) {
+                    ctx.fillStyle = i==0 ? "#38bdf8" : "#94a3b8";
+                    ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                }
+                ctx.fillStyle = "#fb7185"; ctx.fillRect(food.x, food.y, box, box);
+
+                let headX = snake[0].x; let headY = snake[0].y;
+                if(snakeDir === "UP") headY -= box;
+                if(snakeDir === "DOWN") headY += box;
+                if(snakeDir === "LEFT") headX -= box;
+                if(snakeDir === "RIGHT") headX += box;
+
+                if(headX === food.x && headY === food.y) {
+                    snakeScore++; food = {x: Math.floor(Math.random()*14+1)*box, y: Math.floor(Math.random()*14+1)*box};
+                } else snake.pop();
+
+                let newHead = {x: headX, y: headY};
+                if(headX<0||headX>=300||headY<0||headY>=300||snake.some(s=>s.x==newHead.x&&s.y==newHead.y)) {
+                    clearInterval(snakeLoop); alert("Game Over! Skor: " + snakeScore); initSnake();
+                }
+                snake.unshift(newHead);
+            }, speed);
         }
-        update();
-    }
 
-    // 2. SIMON SAYS
-    function startSimon() {
-        openG("Simon Says");
-        let sequence = [], userSeq = [];
-        const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
-        area.innerHTML = `<div class="grid-color">${colors.map((c,i)=>`<div class="color-box" id="b${i}" onclick="checkS(${i})" style="background:${c}"></div>`).join('')}</div><p id="msg">Klik Mulai!</p><button onclick="nextS()" style="padding:10px">Mulai</button>`;
-        window.nextS = () => {
-            userSeq = []; sequence.push(Math.floor(Math.random()*4));
-            let i = 0;
-            let iv = setInterval(() => {
-                let b = document.getElementById('b'+sequence[i]);
-                b.style.opacity = "0.3"; setTimeout(()=>b.style.opacity="1", 300);
-                i++; if(i >= sequence.length) clearInterval(iv);
-            }, 600);
-        };
-        window.checkS = (idx) => {
-            userSeq.push(idx);
-            if(userSeq[userSeq.length-1] !== sequence[userSeq.length-1]) { alert("Salah!"); location.reload(); }
-            if(userSeq.length === sequence.length) { score++; scoreVal.innerText = score; setTimeout(nextS, 800); }
-        };
-    }
-
-    // 3. SUSUN MENARA
-    function startTower() {
-        openG("Susun Menara");
-        area.innerHTML = '<canvas id="c" width="300" height="300"></canvas><p>Klik saat balok sejajar!</p>';
-        const ctx = document.getElementById('c').getContext('2d');
-        let x = 0, w = 100, y = 270, speed = 3;
-        setInterval(() => {
-            ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,300,300);
-            ctx.fillStyle = "#10b981"; ctx.fillRect(x, y, w, 20);
-            x += speed; if(x > 300-w || x < 0) speed *= -1;
-        }, 20);
-        document.getElementById('c').onclick = () => {
-            score++; scoreVal.innerText = score;
-            y -= 25; if(y < 0) { alert("Menara Penuh! Menang!"); location.reload(); }
-        };
-    }
-
-    // 4. CARI WARNA BEDA
-    function startDiff() {
-        openG("Cari Warna Beda");
-        function play() {
-            let r = Math.random()*255, g = Math.random()*255, b = Math.random()*255;
-            let diff = 40 - (score * 2); if(diff < 5) diff = 5;
-            let target = Math.floor(Math.random()*16);
-            area.innerHTML = `<div class="grid-color" style="grid-template-columns:repeat(4,1fr)">${Array(16).fill(0).map((_,i)=>`
-                <div class="color-box" onclick="${i==target?'winD()':'loseD()'}" 
-                style="background:rgb(${i==target?r+diff:r},${i==target?g+diff:g},${i==target?b+diff:b})"></div>`).join('')}</div>`;
+        /* --- 3. LOGIKA MATH QUIZ --- */
+        let mathAns, mathScore = 0;
+        function nextMath() {
+            const level = parseInt(document.getElementById('math-level').value);
+            const a = Math.floor(Math.random() * level);
+            const b = Math.floor(Math.random() * level);
+            mathAns = a + b;
+            document.getElementById('math-q').innerText = `${a} + ${b} = ?`;
+            document.getElementById('math-ans').value = "";
+            document.getElementById('math-ans').focus();
         }
-        window.winD = () => { score++; scoreVal.innerText = score; play(); };
-        window.loseD = () => { alert("Salah pilih!"); location.reload(); };
-        play();
-    }
-
-    // 5. TES REAKSI
-    function startFast() {
-        openG("Tes Reaksi");
-        area.innerHTML = '<div id="box" onclick="hitF()" style="height:250px; background:red; display:flex; align-items:center; justify-content:center; cursor:pointer">Tunggu Hijau...</div>';
-        let start, active = false;
-        setTimeout(() => {
-            document.getElementById('box').style.background = "green";
-            document.getElementById('box').innerText = "KLIK SEKARANG!";
-            start = Date.now(); active = true;
-        }, 2000 + Math.random()*3000);
-        window.hitF = () => {
-            if(active) { alert("Reaksi Anda: " + (Date.now() - start) + "ms"); location.reload(); }
-            else { alert("Terlalu Cepat!"); location.reload(); }
+        document.getElementById('math-ans').oninput = function() {
+            if(parseInt(this.value) === mathAns) {
+                mathScore++;
+                document.getElementById('math-status').innerText = "Skor: " + mathScore;
+                nextMath();
+            }
         };
-    }
-</script>
+
+        /* --- 4. LOGIKA WHACK A MOLE --- */
+        let moleIdx, moleScore, moleLoop;
+        function initMole() {
+            clearInterval(moleLoop);
+            moleScore = 0; document.getElementById('mole-status').innerText = "Skor: 0";
+            const canvas = document.getElementById('moleCanvas');
+            const ctx = canvas.getContext('2d');
+            const speed = document.getElementById('mole-level').value;
+
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                const col = Math.floor(x/100); const row = Math.floor(y/100);
+                if(row*3 + col === moleIdx) {
+                    moleScore++; document.getElementById('mole-status').innerText = "Skor: " + moleScore;
+                    moleIdx = -1; drawMole();
+                }
+            };
+
+            function drawMole() {
+                ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,300,300);
+                for(let i=0; i<9; i++) {
+                    ctx.strokeStyle = "#334155"; ctx.strokeRect((i%3)*100, Math.floor(i/3)*100, 100, 100);
+                    if(i === moleIdx) {
+                        ctx.font = "50px Arial"; ctx.fillText("🐭", (i%3)*100+25, Math.floor(i/3)*100+70);
+                    }
+                }
+            }
+
+            moleLoop = setInterval(() => {
+                moleIdx = Math.floor(Math.random()*9);
+                drawMole();
+            }, speed);
+        }
+    </script>
 </body>
 </html>
