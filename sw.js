@@ -1,6 +1,6 @@
 // Versi 1.0.1 - Terintegrasi dengan Offline Fallback
-const CACHE_NAME = 'offline-v1.0.2';
-const OFFLINE_URL = '/offline.html'; // Pastikan file ini ada di root folder Anda
+const CACHE_NAME = 'offline-v1.0.3';
+const OFFLINE_URL = './offline.html'; // Pastikan file ini ada di root folder Anda
 
 // 1. Tahap Install
 self.addEventListener('install', (e) => {
