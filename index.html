@@ -418,6 +418,20 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
     document.getElementById('fullscreen-info').style.display = 'none';
   });
 </script>
+
+    <script>
+  // 1. Memeriksa dukungan browser
+  if ('serviceWorker' in navigator) {
     
+    // 2. Mendaftarkan file Service Worker (sw.js)
+    navigator.serviceWorker.register('/sw.js')
+      .then((reg) => {
+        console.log('Pendaftaran berhasil!', reg);
+      })
+      .catch((err) => {
+        console.log('Pendaftaran gagal!', err);
+      });
+  }
+</script>
 </body>
 </html>
