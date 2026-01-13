@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pusat Game Offline Az-Zahro</title>
+    <title>Pusat Game Offline</title>
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#0f172a">
@@ -11,7 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
-        /* CSS Dasar Tetap dari Kode Asli Anda */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
@@ -26,7 +25,7 @@
 
         h1 { font-size: 24px; color: #38bdf8; margin: 0 0 10px 0; }
         .menu-selection { margin-bottom: 15px; display: flex; gap: 10px; }
-        select { padding: 8px; border-radius: 5px; background: #1e293b; color: white; border: 1px solid #38bdf8; }
+        select { padding: 8px; border-radius: 5px; background: #1e293b; color: white; border: 1px solid #38bdf8; cursor: pointer; }
 
         /* Navigation Menu Utama */
         #game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
@@ -35,10 +34,10 @@
         .menu-card span { font-size: 40px; display: block; margin-bottom: 10px; }
 
         /* Game Screens */
-        .game-screen { display: none; flex-direction: column; align-items: center; width: 100%; }
+        .game-screen { display: none; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; overflow-y: auto; padding: 20px 0; }
         .active { display: flex; }
 
-        /* Tic Tac Toe Board (Kode Asli Anda) */
+        /* Tic Tac Toe Board */
         .board { 
             display: grid; grid-template-columns: repeat(3, 85px); grid-template-rows: repeat(3, 85px); 
             gap: 10px; background: #1e293b; padding: 15px; border-radius: 15px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
@@ -49,19 +48,21 @@
         #winning-line { position: absolute; background: #f43f5e; display: none; z-index: 10; border-radius: 10px; box-shadow: 0 0 15px #f43f5e; pointer-events: none; }
 
         /* Snake & Mole Canvas */
-        canvas { background: #1e293b; border-radius: 15px; border: 2px solid #334155; max-width: 90vw; }
+        canvas { background: #1e293b; border-radius: 15px; border: 2px solid #334155; max-width: 90vw; max-height: 50vh; }
 
         /* Math Quiz Box */
-        .math-box { background: #1e293b; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #38bdf8; }
+        .math-box { background: #1e293b; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #38bdf8; width: 80%; max-width: 300px; }
         #math-q { font-size: 40px; margin-bottom: 20px; }
-        #math-ans { width: 100px; padding: 10px; font-size: 24px; border-radius: 8px; border: none; text-align: center; }
+        #math-ans { width: 100%; padding: 10px; font-size: 24px; border-radius: 8px; border: none; text-align: center; background: #334155; color: white; }
 
         /* Global UI Elements */
         .status { margin-top: 15px; font-size: 16px; color: #94a3b8; height: 20px; }
-        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
-        button { padding: 10px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-back { background: #ef4444; color: white; width: 80%; max-width: 300px; margin-top: 20px; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        button { padding: 10px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.9); }
+        .btn-back { background: #ef4444; color: white; width: 200px; margin-top: 10px; }
         .btn-reset { background: #334155; color: white; }
+        .btn-start { background: #10b981; color: white; font-size: 18px; padding: 15px 30px; }
     </style>
 </head>
 <body>
@@ -74,7 +75,7 @@
             <div class="menu-card" onclick="showGame('snake')"><span>🐍</span>Snake</div>
             <div class="menu-card" onclick="showGame('math')"><span>➕</span>Math Quiz</div>
             <div class="menu-card" onclick="showGame('mole')"><span>🔨</span>Whack Mole</div>
-            <button class="btn-reset" style="grid-column: span 2;" onclick="window.location.reload()">Cek Koneksi</button>
+            <button class="btn-reset" style="grid-column: span 2; margin-top: 10px;" onclick="window.location.reload()">Cek Koneksi</button>
         </div>
 
         <div id="screen-ttt" class="game-screen">
@@ -112,8 +113,11 @@
                     <option value="40">Kilat!</option>
                 </select>
             </div>
-            <canvas id="snakeCanvas" width="300" height="300"></canvas>
-            <div class="status" id="snake-status">Gunakan Geser/Klik Layar</div>
+            <canvas id="snakeCanvas" width="400" height="400"></canvas>
+            <div id="snake-ui" style="margin-top: 15px;">
+                <button id="btn-start-snake" class="btn-start" onclick="startSnakeLoop()">MULAI GAME</button>
+            </div>
+            <div class="status" id="snake-status">Skor: 0</div>
             <button class="btn-back" onclick="goToMenu()">Menu Utama</button>
         </div>
 
@@ -128,8 +132,8 @@
                 </select>
             </div>
             <div class="math-box">
-                <div id="math-q">0 + 0</div>
-                <input type="number" id="math-ans" placeholder="?">
+                <div id="math-q">? + ?</div>
+                <input type="number" id="math-ans" placeholder="Jawaban">
             </div>
             <div class="status" id="math-status">Skor: 0</div>
             <button class="btn-back" onclick="goToMenu()">Menu Utama</button>
@@ -155,21 +159,20 @@
     <script>
         /* --- NAVIGASI --- */
         function showGame(id) {
-            document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.game-screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
             const target = document.getElementById('screen-' + id);
             target.classList.add('active');
             target.style.display = 'flex';
             document.getElementById('game-menu').style.display = 'none';
 
             if(id === 'snake') initSnake();
-            if(id === 'math') nextMath();
+            if(id === 'math') { mathScore = 0; document.getElementById('math-status').innerText = "Skor: 0"; nextMath(); }
             if(id === 'mole') initMole();
         }
 
         function goToMenu() { location.reload(); }
 
-        /* --- 1. LOGIKA TIC TAC TOE (ASLI ANDA - TIDAK DIUBAH) --- */
+        /* --- 1. LOGIKA TIC TAC TOE (ASLI) --- */
         let board = ["", "", "", "", "", "", "", "", ""];
         let huPlayer = "X"; let aiPlayer = "O"; let gameActive = true;
         const winConditions = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
@@ -246,7 +249,7 @@
         }
 
         function updateDisplay() {
-            const cells = document.querySelectorAll('.cell');
+            const cells = document.querySelectorAll('#screen-ttt .cell');
             board.forEach((val, i) => {
                 cells[i].innerText = val;
                 cells[i].className = val === "X" ? "cell x-color" : (val === "O" ? "cell o-color" : "cell");
@@ -259,136 +262,110 @@
             document.getElementById('status').innerText = "Giliran Kamu"; updateDisplay();
         }
 
-        /* --- 2. LOGIKA SNAKE --- */
-let snake, food, snakeDir, snakeScore, snakeLoop;
-
-function initSnake() {
-    // Hentikan loop lama jika ada sebelum memulai yang baru
-    if (snakeLoop) clearInterval(snakeLoop);
-    
-    const canvas = document.getElementById('snakeCanvas');
-    const ctx = canvas.getContext('2d');
-    const box = 20;
-    snake = [{x: 8 * box, y: 8 * box}]; 
-    food = {x: 4 * box, y: 4 * box};
-    snakeDir = "RIGHT"; 
-    snakeScore = 0;
-    document.getElementById('snake-status').innerText = "Skor: 0";
-    
-    const speed = parseInt(document.getElementById('snake-level').value);
-
-    // Kontrol Keyboard
-    document.onkeydown = (e) => {
-        if(e.key === "ArrowUp" && snakeDir !== "DOWN") snakeDir = "UP";
-        if(e.key === "ArrowDown" && snakeDir !== "UP") snakeDir = "DOWN";
-        if(e.key === "ArrowLeft" && snakeDir !== "RIGHT") snakeDir = "LEFT";
-        if(e.key === "ArrowRight" && snakeDir !== "LEFT") snakeDir = "RIGHT";
-    };
-
-    snakeLoop = setInterval(() => {
-        ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,300,300);
-        
-        // Gambar Ular
-        for(let i=0; i<snake.length; i++) {
-            ctx.fillStyle = i==0 ? "#38bdf8" : "#94a3b8";
-            ctx.fillRect(snake[i].x, snake[i].y, box-1, box-1);
-        }
-        
-        // Gambar Makanan
-        ctx.fillStyle = "#fb7185"; 
-        ctx.fillRect(food.x, food.y, box-1, box-1);
-
-        let headX = snake[0].x; 
-        let headY = snake[0].y;
-        
-        if(snakeDir === "UP") headY -= box;
-        if(snakeDir === "DOWN") headY += box;
-        if(snakeDir === "LEFT") headX -= box;
-        if(snakeDir === "RIGHT") headX += box;
-
-        // Cek Makan
-        if(headX === food.x && headY === food.y) {
-            snakeScore++; 
-            document.getElementById('snake-status').innerText = "Skor: " + snakeScore;
-            food = {
-                x: Math.floor(Math.random() * 14 + 1) * box, 
-                y: Math.floor(Math.random() * 14 + 1) * box
-            };
-        } else {
-            snake.pop();
-        }
-
-        let newHead = {x: headX, y: headY};
-
-        // CEK TABRAKAN (GAME OVER)
-        if(headX < 0 || headX >= 300 || headY < 0 || headY >= 300 || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
-            // PENTING: Hentikan loop SEBELUM alert muncul
+        /* --- 2. LOGIKA SNAKE (LEBAR 400 & TOMBOL MULAI) --- */
+        let snake, food, snakeDir, snakeScore, snakeLoop;
+        function initSnake() {
             clearInterval(snakeLoop);
-            
-            // Berikan jeda sedikit agar layar sempat terupdate sebelum alert muncul
-            setTimeout(() => {
-                alert("Game Over!\nSkor Anda: " + snakeScore);
-                // Setelah klik OK, kembalikan ke menu atau reset
-                initSnake(); 
-            }, 100);
-            return;
+            const canvas = document.getElementById('snakeCanvas');
+            const ctx = canvas.getContext('2d');
+            const box = 20;
+            snake = [{x: 10*box, y: 10*box}]; food = {x: 5*box, y: 5*box};
+            snakeDir = "RIGHT"; snakeScore = 0;
+            document.getElementById('btn-start-snake').style.display = "inline-block";
+            document.getElementById('snake-status').innerText = "Klik Mulai untuk bermain";
+            ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,400,400);
+            ctx.fillStyle = "#38bdf8"; ctx.fillRect(snake[0].x, snake[0].y, box-1, box-1);
         }
-        
-        snake.unshift(newHead);
-    }, speed);
-}
-        /* --- 3. LOGIKA MATH QUIZ --- */
+
+        function startSnakeLoop() {
+            document.getElementById('btn-start-snake').style.display = "none";
+            const canvas = document.getElementById('snakeCanvas');
+            const ctx = canvas.getContext('2d');
+            const box = 20;
+            const speed = parseInt(document.getElementById('snake-level').value);
+
+            document.onkeydown = (e) => {
+                if(e.key === "ArrowUp" && snakeDir !== "DOWN") snakeDir = "UP";
+                if(e.key === "ArrowDown" && snakeDir !== "UP") snakeDir = "DOWN";
+                if(e.key === "ArrowLeft" && snakeDir !== "RIGHT") snakeDir = "LEFT";
+                if(e.key === "ArrowRight" && snakeDir !== "LEFT") snakeDir = "RIGHT";
+            };
+
+            snakeLoop = setInterval(() => {
+                ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,400,400);
+                for(let i=0; i<snake.length; i++) {
+                    ctx.fillStyle = i==0 ? "#38bdf8" : "#94a3b8";
+                    ctx.fillRect(snake[i].x, snake[i].y, box-1, box-1);
+                }
+                ctx.fillStyle = "#fb7185"; ctx.fillRect(food.x, food.y, box-1, box-1);
+
+                let headX = snake[0].x; let headY = snake[0].y;
+                if(snakeDir === "UP") headY -= box;
+                if(snakeDir === "DOWN") headY += box;
+                if(snakeDir === "LEFT") headX -= box;
+                if(snakeDir === "RIGHT") headX += box;
+
+                if(headX === food.x && headY === food.y) {
+                    snakeScore++; document.getElementById('snake-status').innerText = "Skor: " + snakeScore;
+                    food = {x: Math.floor(Math.random()*19)*box, y: Math.floor(Math.random()*19)*box};
+                } else snake.pop();
+
+                let newHead = {x: headX, y: headY};
+                if(headX<0||headX>=400||headY<0||headY>=400||snake.some(s=>s.x==newHead.x&&s.y==newHead.y)) {
+                    clearInterval(snakeLoop); setTimeout(() => { alert("Game Over! Skor: " + snakeScore); initSnake(); }, 100); return;
+                }
+                snake.unshift(newHead);
+            }, speed);
+        }
+
+        /* --- 3. LOGIKA MATH QUIZ (VARIASI OPERATOR) --- */
         let mathAns, mathScore = 0;
         function nextMath() {
             const level = parseInt(document.getElementById('math-level').value);
-            const a = Math.floor(Math.random() * level);
-            const b = Math.floor(Math.random() * level);
-            mathAns = a + b;
-            document.getElementById('math-q').innerText = `${a} + ${b} = ?`;
-            document.getElementById('math-ans').value = "";
-            document.getElementById('math-ans').focus();
+            const ops = ['+', '-', '*', '/'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            let a, b;
+
+            if (op === '+') {
+                a = Math.floor(Math.random() * level); b = Math.floor(Math.random() * level); mathAns = a + b;
+            } else if (op === '-') {
+                a = Math.floor(Math.random() * level) + level; b = Math.floor(Math.random() * level); mathAns = a - b;
+            } else if (op === '*') {
+                a = Math.floor(Math.random() * (level/5)) + 1; b = Math.floor(Math.random() * 10) + 1; mathAns = a * b;
+            } else if (op === '/') {
+                mathAns = Math.floor(Math.random() * 10) + 1; b = Math.floor(Math.random() * 10) + 1; a = mathAns * b;
+            }
+
+            document.getElementById('math-q').innerText = `${a} ${op === '*' ? '×' : op === '/' ? '÷' : op} ${b}`;
+            document.getElementById('math-ans').value = ""; document.getElementById('math-ans').focus();
         }
         document.getElementById('math-ans').oninput = function() {
             if(parseInt(this.value) === mathAns) {
-                mathScore++;
-                document.getElementById('math-status').innerText = "Skor: " + mathScore;
-                nextMath();
+                mathScore++; document.getElementById('math-status').innerText = "Skor: " + mathScore; nextMath();
             }
         };
 
         /* --- 4. LOGIKA WHACK A MOLE --- */
         let moleIdx, moleScore, moleLoop;
         function initMole() {
-            clearInterval(moleLoop);
-            moleScore = 0; document.getElementById('mole-status').innerText = "Skor: 0";
+            clearInterval(moleLoop); moleScore = 0; document.getElementById('mole-status').innerText = "Skor: 0";
             const canvas = document.getElementById('moleCanvas');
             const ctx = canvas.getContext('2d');
             const speed = document.getElementById('mole-level').value;
-
             canvas.onclick = (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-                const col = Math.floor(x/100); const row = Math.floor(y/100);
-                if(row*3 + col === moleIdx) {
-                    moleScore++; document.getElementById('mole-status').innerText = "Skor: " + moleScore;
-                    moleIdx = -1; drawMole();
-                }
+                const col = Math.floor(x/(rect.width/3)); const row = Math.floor(y/(rect.height/3));
+                if(row*3 + col === moleIdx) { moleScore++; document.getElementById('mole-status').innerText = "Skor: " + moleScore; moleIdx = -1; drawMole(); }
             };
-
             function drawMole() {
                 ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,300,300);
                 for(let i=0; i<9; i++) {
                     ctx.strokeStyle = "#334155"; ctx.strokeRect((i%3)*100, Math.floor(i/3)*100, 100, 100);
-                    if(i === moleIdx) {
-                        ctx.font = "50px Arial"; ctx.fillText("🐭", (i%3)*100+25, Math.floor(i/3)*100+70);
-                    }
+                    if(i === moleIdx) { ctx.font = "50px Arial"; ctx.fillText("🐭", (i%3)*100+25, Math.floor(i/3)*100+70); }
                 }
             }
-
-            moleLoop = setInterval(() => {
-                moleIdx = Math.floor(Math.random()*9);
-                drawMole();
-            }, speed);
+            moleLoop = setInterval(() => { moleIdx = Math.floor(Math.random()*9); drawMole(); }, speed);
         }
     </script>
 </body>
