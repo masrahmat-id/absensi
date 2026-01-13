@@ -50,7 +50,7 @@
         /* Snake & Mole Canvas */
         canvas { background: #1e293b; border-radius: 15px; border: 2px solid #334155; max-width: 90vw; max-height: 45vh; }
 
-        /* Snake Controls (D-Pad) */
+        /* Snake Controls */
         .snake-controls { display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(2, 60px); gap: 10px; margin-top: 15px; }
         .ctrl-btn { background: #334155; border: 2px solid #38bdf8; color: white; border-radius: 12px; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .ctrl-btn:active { background: #38bdf8; color: #0f172a; }
@@ -63,6 +63,7 @@
         .math-box { background: #1e293b; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #38bdf8; width: 80%; max-width: 300px; }
         #math-q { font-size: 40px; margin-bottom: 20px; }
         #math-ans { width: 100%; padding: 10px; font-size: 24px; border-radius: 8px; border: none; text-align: center; background: #334155; color: white; }
+        #math-lives { color: #fb7185; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
 
         /* Global UI Elements */
         .status { margin-top: 10px; font-size: 16px; color: #94a3b8; height: 20px; }
@@ -115,21 +116,19 @@
             <div class="menu-selection">
                 <label>Kecepatan: </label>
                 <select id="snake-level" onchange="initSnake()">
-                    <option value="200" selected>Santai</option>
-                    <option value="150">Normal</option>
+                    <option value="200">Santai</option>
+                    <option value="150" selected>Normal</option>
                     <option value="80">Cepat</option>
                     <option value="40">Kilat!</option>
                 </select>
             </div>
             <canvas id="snakeCanvas" width="400" height="400"></canvas>
-            
             <div id="snake-controls-ui" class="snake-controls" style="display: none;">
                 <div class="ctrl-btn up" onclick="changeSnakeDir('UP')">▲</div>
                 <div class="ctrl-btn left" onclick="changeSnakeDir('LEFT')">◀</div>
                 <div class="ctrl-btn down" onclick="changeSnakeDir('DOWN')">▼</div>
                 <div class="ctrl-btn right" onclick="changeSnakeDir('RIGHT')">▶</div>
             </div>
-
             <div id="snake-ui-start" style="margin-top: 15px;">
                 <button id="btn-start-snake" class="btn-start" onclick="startSnakeLoop()">MULAI GAME</button>
             </div>
@@ -141,12 +140,13 @@
             <h1>MATH QUIZ</h1>
             <div class="menu-selection">
                 <label>Tingkat: </label>
-                <select id="math-level" onchange="nextMath()">
+                <select id="math-level" onchange="resetMath()">
                     <option value="10">Anak-anak</option>
                     <option value="50" selected>Sedang</option>
                     <option value="200">Jenius</option>
                 </select>
             </div>
+            <div id="math-lives">❤️❤️❤️❤️❤️</div>
             <div class="math-box">
                 <div id="math-q">? + ?</div>
                 <input type="number" id="math-ans" placeholder="Jawaban">
@@ -182,13 +182,13 @@
             document.getElementById('game-menu').style.display = 'none';
 
             if(id === 'snake') initSnake();
-            if(id === 'math') { mathScore = 0; document.getElementById('math-status').innerText = "Skor: 0"; nextMath(); }
+            if(id === 'math') resetMath();
             if(id === 'mole') initMole();
         }
 
         function goToMenu() { location.reload(); }
 
-        /* --- 1. LOGIKA TIC TAC TOE (KODE ASLI) --- */
+        /* --- 1. LOGIKA TIC TAC TOE --- */
         let board = ["", "", "", "", "", "", "", "", ""];
         let huPlayer = "X"; let aiPlayer = "O"; let gameActive = true;
         const winConditions = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
@@ -272,14 +272,12 @@
 
         /* --- 2. LOGIKA SNAKE --- */
         let snake, food, snakeDir, snakeScore, snakeLoop;
-        
         function changeSnakeDir(newDir) {
             if(newDir === "UP" && snakeDir !== "DOWN") snakeDir = "UP";
             if(newDir === "DOWN" && snakeDir !== "UP") snakeDir = "DOWN";
             if(newDir === "LEFT" && snakeDir !== "RIGHT") snakeDir = "LEFT";
             if(newDir === "RIGHT" && snakeDir !== "LEFT") snakeDir = "RIGHT";
         }
-
         function initSnake() {
             clearInterval(snakeLoop);
             const canvas = document.getElementById('snakeCanvas');
@@ -293,7 +291,6 @@
             ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,400,400);
             ctx.fillStyle = "#38bdf8"; ctx.fillRect(snake[0].x, snake[0].y, box-1, box-1);
         }
-
         function startSnakeLoop() {
             document.getElementById('btn-start-snake').style.display = "none";
             document.getElementById('snake-controls-ui').style.display = "grid";
@@ -301,14 +298,12 @@
             const ctx = canvas.getContext('2d');
             const box = 20;
             const speed = parseInt(document.getElementById('snake-level').value);
-
             document.onkeydown = (e) => {
                 if(e.key === "ArrowUp") changeSnakeDir("UP");
                 if(e.key === "ArrowDown") changeSnakeDir("DOWN");
                 if(e.key === "ArrowLeft") changeSnakeDir("LEFT");
                 if(e.key === "ArrowRight") changeSnakeDir("RIGHT");
             };
-
             snakeLoop = setInterval(() => {
                 ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,400,400);
                 for(let i=0; i<snake.length; i++) {
@@ -316,18 +311,15 @@
                     ctx.fillRect(snake[i].x, snake[i].y, box-1, box-1);
                 }
                 ctx.fillStyle = "#fb7185"; ctx.fillRect(food.x, food.y, box-1, box-1);
-
                 let headX = snake[0].x; let headY = snake[0].y;
                 if(snakeDir === "UP") headY -= box;
                 if(snakeDir === "DOWN") headY += box;
                 if(snakeDir === "LEFT") headX -= box;
                 if(snakeDir === "RIGHT") headX += box;
-
                 if(headX === food.x && headY === food.y) {
                     snakeScore++; document.getElementById('snake-status').innerText = "Skor: " + snakeScore;
                     food = {x: Math.floor(Math.random()*19)*box, y: Math.floor(Math.random()*19)*box};
                 } else snake.pop();
-
                 let newHead = {x: headX, y: headY};
                 if(headX<0||headX>=400||headY<0||headY>=400||snake.some(s=>s.x==newHead.x&&s.y==newHead.y)) {
                     clearInterval(snakeLoop); setTimeout(() => { alert("Game Over! Skor: " + snakeScore); initSnake(); }, 100); return;
@@ -336,8 +328,23 @@
             }, speed);
         }
 
-        /* --- 3. LOGIKA MATH QUIZ --- */
-        let mathAns, mathScore = 0;
+        /* --- 3. LOGIKA MATH QUIZ (DENGAN NYAWA) --- */
+        let mathAns, mathScore = 0, mathLives = 5;
+
+        function resetMath() {
+            mathScore = 0;
+            mathLives = 5;
+            document.getElementById('math-status').innerText = "Skor: 0";
+            updateMathLives();
+            nextMath();
+        }
+
+        function updateMathLives() {
+            let hearts = "";
+            for(let i=0; i<mathLives; i++) hearts += "❤️";
+            document.getElementById('math-lives').innerText = hearts || "GAME OVER";
+        }
+
         function nextMath() {
             const level = parseInt(document.getElementById('math-level').value);
             const ops = ['+', '-', '*', '/'];
@@ -350,9 +357,32 @@
             document.getElementById('math-q').innerText = `${a} ${op === '*' ? '×' : op === '/' ? '÷' : op} ${b}`;
             document.getElementById('math-ans').value = ""; document.getElementById('math-ans').focus();
         }
+
+        document.getElementById('math-ans').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkMathAnswer();
+            }
+        });
+
+        // Event listener 'oninput' hanya memproses jawaban otomatis jika benar
+        // Tapi untuk sistem nyawa, kita tambahkan logika tombol enter agar user tidak kaget
         document.getElementById('math-ans').oninput = function() {
-            if(parseInt(this.value) === mathAns) {
-                mathScore++; document.getElementById('math-status').innerText = "Skor: " + mathScore; nextMath();
+            if(this.value.length >= mathAns.toString().length) {
+               if(parseInt(this.value) === mathAns) {
+                   mathScore++; 
+                   document.getElementById('math-status').innerText = "Skor: " + mathScore; 
+                   nextMath();
+               } else {
+                   // Jika jawaban salah dan panjang input sudah sama/lebih dengan jawaban asli
+                   mathLives--;
+                   updateMathLives();
+                   if(mathLives <= 0) {
+                       alert("Game Over! Skor Akhir: " + mathScore);
+                       resetMath();
+                   } else {
+                       nextMath();
+                   }
+               }
             }
         };
 
