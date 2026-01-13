@@ -424,7 +424,7 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
   if ('serviceWorker' in navigator) {
     
     // 2. Mendaftarkan file Service Worker (sw.js)
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('./sw.js')
       .then((reg) => {
         console.log('Pendaftaran berhasil!', reg);
       })
