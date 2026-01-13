@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline Game - Tic Tac Toe Levels</title>
+    <title>Offline Game - Tic Tac Toe</title>
     <style>
         /* Dasar & Reset */
-        * { box-sizing: border-box; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; /* Hilangkan kedipan biru saat klik di HP */
+            outline: none;
+        }
         
         body, html {
             margin: 0;
@@ -27,7 +31,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer; /* Memberi petunjuk bahwa layar bisa diklik */
+            cursor: pointer;
         }
 
         h1 { font-size: 24px; color: #38bdf8; margin: 0 0 10px 0; pointer-events: none; }
@@ -48,7 +52,8 @@
             padding: 15px; 
             border-radius: 15px; 
             position: relative;
-            pointer-events: auto; /* Agar klik di dalam board tetap berfungsi untuk game */
+            pointer-events: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
         .cell { 
@@ -56,7 +61,7 @@
             justify-content: center; font-size: 35px; font-weight: bold; cursor: pointer;
             transition: background 0.2s;
         }
-        .cell:hover { background: #475569; }
+        .cell:active { background: #475569; }
         .cell.x-color { color: #38bdf8; }
         .cell.o-color { color: #fb7185; }
 
@@ -73,13 +78,13 @@
         .btn-reset { background: #334155; color: white; }
         .btn-online { background: #0ea5e9; color: white; }
 
-        /* Instruksi kecil */
         .hint {
-            position: absolute; bottom: 10px; font-size: 10px; color: #475569;
+            position: absolute; bottom: 15px; font-size: 11px; color: #475569;
+            pointer-events: none;
         }
     </style>
 </head>
-<body onclick="requestFullscreen()">
+<body onclick="handleScreenClick(event)">
 
     <div id="main-container">
         <h1>TIC TAC TOE</h1>
@@ -114,19 +119,25 @@
             <button class="btn-online" onclick="window.location.reload()">Cek Koneksi</button>
         </div>
 
-        <div class="hint">Klik area kosong untuk layar penuh</div>
+        <div class="hint">Sentuh area luar untuk Layar Penuh</div>
     </div>
 
     <script>
-        /* --- LOGIKA FULLSCREEN --- */
-        function requestFullscreen() {
-            let elem = document.documentElement;
-            if (!document.fullscreenElement) {
+        /* --- LOGIKA FULLSCREEN (ANTI-KEDIP) --- */
+        function handleScreenClick(e) {
+            // Cek apakah sudah fullscreen
+            const isFullscreen = document.fullscreenElement || 
+                                 document.webkitFullscreenElement || 
+                                 document.msFullscreenElement;
+
+            // Jika belum fullscreen, baru jalankan request
+            if (!isFullscreen) {
+                let elem = document.documentElement;
                 if (elem.requestFullscreen) {
                     elem.requestFullscreen();
-                } else if (elem.webkitRequestFullscreen) { /* Safari */
+                } else if (elem.webkitRequestFullscreen) {
                     elem.webkitRequestFullscreen();
-                } else if (elem.msRequestFullscreen) { /* IE11 */
+                } else if (elem.msRequestFullscreen) {
                     elem.msRequestFullscreen();
                 }
             }
