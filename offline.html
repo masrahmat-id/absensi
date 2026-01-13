@@ -12,15 +12,29 @@
 
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        /* CSS UPDATE: Memastikan Full Layar & Anti-Scroll */
         body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-            background: #0f172a; font-family: 'Segoe UI', sans-serif; color: #fff;
+            margin: 0; padding: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            overflow: hidden; 
+            background: #0f172a; 
+            font-family: 'Segoe UI', sans-serif; 
+            color: #fff;
             padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         #main-container {
-            width: 100%; height: 100%; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            position: fixed;
+            top: 0; left: 0;
         }
 
         h1 { font-size: 24px; color: #38bdf8; margin: 0 0 10px 0; }
@@ -167,8 +181,21 @@
     </div>
 
     <script>
+        /* --- AUTO FULLSCREEN LOGIC --- */
+        function activateFullScreen() {
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen();
+            } else if (docElm.webkitRequestFullscreen) {
+                docElm.webkitRequestFullscreen();
+            } else if (docElm.msRequestFullscreen) {
+                docElm.msRequestFullscreen();
+            }
+        }
+
         /* --- NAVIGASI --- */
         function showGame(id) {
+            activateFullScreen(); // Picu fullscreen saat klik game
             document.querySelectorAll('.game-screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
             const target = document.getElementById('screen-' + id);
             target.classList.add('active');
@@ -425,11 +452,8 @@
             else { speed = 600; carrotCount = 5; }
 
             moleLoop = setInterval(() => { 
-                // Reset posisi
                 rabbitIdx = Math.floor(Math.random()*9);
                 carrotIndices = [];
-                
-                // Tambah wortel di lubang yang tidak ada kelinci
                 while(carrotIndices.length < carrotCount) {
                     let r = Math.floor(Math.random()*9);
                     if(r !== rabbitIdx && !carrotIndices.includes(r)) {
