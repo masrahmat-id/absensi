@@ -3,49 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline - Tic Tac Toe</title>
+    <title>Offline - Impossible Mode</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #fff; text-align: center; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #fff; text-align: center; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        h1 { font-size: 20px; color: #38bdf8; margin-bottom: 5px; }
+        .difficulty { color: #ef4444; font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 2px; }
         
         .board { 
-            display: grid; 
-            grid-template-columns: repeat(3, 100px); 
-            grid-template-rows: repeat(3, 100px); 
-            gap: 10px; 
-            background: #16213e; 
-            padding: 10px; 
-            border-radius: 10px; 
-            position: relative; /* Penting untuk posisi garis */
+            display: grid; grid-template-columns: repeat(3, 90px); grid-template-rows: repeat(3, 90px); 
+            gap: 12px; background: #1e293b; padding: 15px; border-radius: 15px; position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
         .cell { 
-            background: #0f3460; 
-            border-radius: 8px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 40px; 
-            font-weight: bold; 
-            cursor: pointer; 
+            background: #334155; border-radius: 10px; display: flex; align-items: center; 
+            justify-content: center; font-size: 35px; font-weight: bold; cursor: pointer; transition: 0.2s;
         }
+        .cell:hover { background: #475569; }
+        .cell.x-color { color: #38bdf8; }
+        .cell.o-color { color: #fb7185; }
 
-        /* Garis Kemenangan */
         #winning-line {
-            position: absolute;
-            background-color: #e94560;
-            display: none; /* Sembunyi secara default */
-            z-index: 10;
-            border-radius: 5px;
-            transition: all 0.3s ease;
+            position: absolute; background: #f43f5e; display: none; z-index: 10;
+            border-radius: 10px; box-shadow: 0 0 15px #f43f5e;
+            transition: width 0.5s ease-out, height 0.5s ease-out;
         }
 
-        .status { margin-top: 20px; font-size: 18px; font-weight: bold; height: 25px; }
-        .btn-action { margin-top: 15px; padding: 10px 20px; background: #e94560; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .status { margin-top: 25px; font-size: 16px; color: #94a3b8; height: 20px; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        button { 
+            padding: 10px 15px; border: none; border-radius: 8px; font-weight: bold; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .btn-reset { background: #334155; color: white; }
+        .btn-online { background: #0ea5e9; color: white; }
     </style>
 </head>
 <body>
 
-    <h1>Koneksi Terputus</h1>
+    <h1>TIC TAC TOE</h1>
+    <div class="difficulty">Mode: Mustahil Menang</div>
+
     <div class="board" id="board">
         <div id="winning-line"></div>
         <div class="cell" onclick="makeMove(0)"></div>
@@ -59,85 +57,126 @@
         <div class="cell" onclick="makeMove(8)"></div>
     </div>
 
-    <div class="status" id="status">Giliran Kamu (X)</div>
-    <button class="btn-action" onclick="resetGame()">Main Lagi</button>
+    <div class="status" id="status">Giliran Kamu</div>
+    
+    <div class="btn-group">
+        <button class="btn-reset" onclick="resetGame()">Ulang</button>
+        <button class="btn-online" onclick="window.location.reload()">Cek Koneksi</button>
+    </div>
 
     <script>
         let board = ["", "", "", "", "", "", "", "", ""];
+        let huPlayer = "X";
+        let aiPlayer = "O";
         let gameActive = true;
-        const cells = document.querySelectorAll('.cell');
-        const statusText = document.getElementById('status');
-        const winLine = document.getElementById('winning-line');
-
-        // Koordinat garis [top, left, width, height, rotation]
-        const lineStyles = [
-            [45, 15, 290, 8, 0],   // Baris 1
-            [155, 15, 290, 8, 0],  // Baris 2
-            [265, 15, 290, 8, 0],  // Baris 3
-            [15, 45, 8, 290, 0],   // Kolom 1
-            [15, 155, 8, 290, 0],  // Kolom 2
-            [15, 265, 8, 290, 0],  // Kolom 3
-            [15, 15, 390, 8, 45],  // Diagonal \
-            [15, 305, 390, 8, 135] // Diagonal /
-        ];
 
         const winConditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], 
-            [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
+            [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]
         ];
 
-        function drawLine(index) {
-            const [top, left, w, h, deg] = lineStyles[index];
-            winLine.style.top = top + "px";
-            winLine.style.left = left + "px";
-            winLine.style.width = w + "px";
-            winLine.style.height = h + "px";
-            winLine.style.transform = `rotate(${deg}deg)`;
-            winLine.style.transformOrigin = "top left";
-            winLine.style.display = "block";
-        }
+        const lineStyles = [
+            [55, 20, 280, 6, 0], [157, 20, 280, 6, 0], [259, 20, 280, 6, 0], // Horiz
+            [20, 55, 6, 280, 0], [20, 157, 6, 280, 0], [20, 259, 6, 280, 0], // Vert
+            [30, 30, 380, 6, 45], [30, 290, 380, 6, 135] // Diag
+        ];
 
-        function checkWinner() {
-            for (let i = 0; i < winConditions.length; i++) {
-                let [a, b, c] = winConditions[i];
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                    statusText.innerText = board[a] === "X" ? "Kamu Menang! 🎉" : "Komputer Menang! 🤖";
-                    gameActive = false;
-                    drawLine(i); // Gambar garis sejajar
-                    return;
+        function makeMove(idx) {
+            if (board[idx] === "" && gameActive) {
+                board[idx] = huPlayer;
+                updateDisplay();
+                if (!checkWin(board, huPlayer) && !checkTie()) {
+                    setTimeout(() => {
+                        let bestMove = minimax(board, aiPlayer).index;
+                        board[bestMove] = aiPlayer;
+                        updateDisplay();
+                        checkGameStatus();
+                    }, 400);
+                } else {
+                    checkGameStatus();
                 }
             }
-            if (!board.includes("")) {
-                statusText.innerText = "Hasil Seri! 🤝";
+        }
+
+        function updateDisplay() {
+            const cells = document.querySelectorAll('.cell');
+            board.forEach((val, i) => {
+                cells[i].innerText = val;
+                if(val === "X") cells[i].className = "cell x-color";
+                if(val === "O") cells[i].className = "cell o-color";
+            });
+        }
+
+        function checkGameStatus() {
+            let win = checkWin(board, huPlayer) || checkWin(board, aiPlayer);
+            if (win) {
+                document.getElementById('status').innerText = win.player === "X" ? "Kamu Menang! (Kok bisa?)" : "Komputer Menang! 🤖";
+                drawWinLine(win.index);
+                gameActive = false;
+            } else if (checkTie()) {
+                document.getElementById('status').innerText = "Hasil Seri! 🤝";
                 gameActive = false;
             }
         }
 
-        function makeMove(index) {
-            if (board[index] === "" && gameActive) {
-                board[index] = "X";
-                cells[index].innerText = "X";
-                checkWinner();
-                if (gameActive) setTimeout(computerMove, 500);
-            }
+        function drawWinLine(conditionIdx) {
+            const line = document.getElementById('winning-line');
+            const [top, left, w, h, deg] = lineStyles[conditionIdx];
+            line.style.top = top + "px"; line.style.left = left + "px";
+            line.style.width = w + "px"; line.style.height = h + "px";
+            line.style.transform = `rotate(${deg}deg)`; line.style.transformOrigin = "top left";
+            line.style.display = "block";
         }
 
-        function computerMove() {
-            let empty = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
-            if (empty.length > 0 && gameActive) {
-                let idx = empty[Math.floor(Math.random() * empty.length)];
-                board[idx] = "O";
-                cells[idx].innerText = "O";
-                checkWinner();
+        // --- ALGORITMA MINIMAX (OTAK AI) ---
+        function minimax(newBoard, player) {
+            let availSpots = newBoard.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+            if (checkWin(newBoard, huPlayer)) return {score: -10};
+            if (checkWin(newBoard, aiPlayer)) return {score: 10};
+            if (availSpots.length === 0) return {score: 0};
+
+            let moves = [];
+            for (let i = 0; i < availSpots.length; i++) {
+                let move = {};
+                move.index = availSpots[i];
+                newBoard[availSpots[i]] = player;
+                if (player === aiPlayer) move.score = minimax(newBoard, huPlayer).score;
+                else move.score = minimax(newBoard, aiPlayer).score;
+                newBoard[availSpots[i]] = "";
+                moves.push(move);
             }
+
+            let bestMove;
+            if (player === aiPlayer) {
+                let bestScore = -10000;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score > bestScore) { bestScore = moves[i].score; bestMove = i; }
+                }
+            } else {
+                let bestScore = 10000;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score < bestScore) { bestScore = moves[i].score; bestMove = i; }
+                }
+            }
+            return moves[bestMove];
         }
+
+        function checkWin(b, p) {
+            for (let i = 0; i < winConditions.length; i++) {
+                if (b[winConditions[i][0]] === p && b[winConditions[i][1]] === p && b[winConditions[i][2]] === p) {
+                    return {index: i, player: p};
+                }
+            }
+            return null;
+        }
+
+        function checkTie() { return board.filter(s => s === "").length === 0; }
 
         function resetGame() {
             board = ["", "", "", "", "", "", "", "", ""];
             gameActive = true;
-            statusText.innerText = "Giliran Kamu (X)";
-            winLine.style.display = "none";
-            cells.forEach(c => c.innerText = "");
+            document.getElementById('winning-line').style.display = "none";
+            document.getElementById('status').innerText = "Giliran Kamu";
+            updateDisplay();
         }
     </script>
 </body>
