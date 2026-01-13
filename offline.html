@@ -3,45 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>10 Games Offline Center</title>
+    <title>5 Game Baru Offline</title>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; }
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #10b981; --text: #f8fafc; }
         body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; text-align: center; touch-action: manipulation; }
         .container { padding: 15px; max-width: 450px; margin: auto; min-height: 100vh; }
-        
-        /* Menu */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .card { background: var(--card); padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid #334155; }
-        .card span { font-size: 30px; display: block; }
-        .card:active { transform: scale(0.95); background: #334155; }
-
-        /* Screens */
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; }
+        .card span { font-size: 24px; }
         .screen { display: none; }
         .active { display: block; }
-        canvas { background: #000; border: 2px solid var(--accent); border-radius: 8px; max-width: 100%; display: block; margin: 0 auto; }
-        
+        #game-area { background: #1e293b; border-radius: 15px; padding: 20px; min-height: 300px; position: relative; border: 2px solid var(--accent); }
         .btn-back { margin-top: 20px; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 8px; width: 100%; font-weight: bold; }
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
-        .btn-ctrl { background: #334155; border: none; color: white; padding: 15px; border-radius: 8px; font-size: 20px; }
-        input { width: 80%; padding: 12px; font-size: 20px; border-radius: 8px; text-align: center; margin-top: 10px; }
+        input { width: 80%; padding: 12px; font-size: 20px; border-radius: 8px; text-align: center; }
+        .grid-color { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .color-box { height: 70px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="menu-screen" class="screen active">
-        <h2>🎮 10 Game Offline</h2>
+        <h2>🎮 5 Game Baru</h2>
         <div class="menu-grid">
-            <div class="card" onclick="playSnake()"><span>🐍</span>Snake</div>
-            <div class="card" onclick="playMath()"><span>➕</span>Math</div>
-            <div class="card" onclick="playDino()"><span>🦖</span>Dino Jump</div>
-            <div class="card" onclick="playCatch()"><span>🎯</span>Catch Me</div>
-            <div class="card" onclick="playGuess()"><span>🔢</span>Tebak Angka</div>
-            <div class="card" onclick="playWhack()"><span>🔨</span>Whack Mole</div>
-            <div class="card" onclick="playClicker()"><span>🖱️</span>Clicker</div>
-            <div class="card" onclick="playTic()"><span>❌</span>TicTacToe</div>
-            <div class="card" onclick="playEmoji()"><span>🧠</span>Memory</div>
-            <div class="card" onclick="playPong()"><span>🏓</span>Pong</div>
+            <div class="card" onclick="startWord()">Menebak Kata (Hangman) <span>🔤</span></div>
+            <div class="card" onclick="startSimon()">Simon Says (Ingatan) <span>🔴</span></div>
+            <div class="card" onclick="startTower()">Susun Menara <span>🏢</span></div>
+            <div class="card" onclick="startDiff()">Cari Warna Beda <span>🎨</span></div>
+            <div class="card" onclick="startFast()">Tes Reaksi ⚡ <span>⏱️</span></div>
         </div>
         <button class="btn-back" style="background:#0ea5e9" onclick="window.location.reload()">Cek Koneksi</button>
     </div>
@@ -49,167 +38,110 @@
     <div id="game-screen" class="screen">
         <h3 id="game-title">Game</h3>
         <p>Skor: <span id="score">0</span></p>
-        <div id="game-content"></div>
-        <div id="game-ctrl"></div>
-        <button class="btn-back" onclick="exitGame()">Kembali ke Menu</button>
+        <div id="game-area"></div>
+        <button class="btn-back" onclick="location.reload()">Kembali ke Menu</button>
     </div>
 </div>
 
 <script>
     let score = 0;
-    let loop;
-    const content = document.getElementById('game-content');
-    const ctrl = document.getElementById('game-ctrl');
+    const area = document.getElementById('game-area');
+    const scoreVal = document.getElementById('score');
 
-    function openScreen(title) {
+    function openG(t) {
         document.getElementById('menu-screen').classList.remove('active');
         document.getElementById('game-screen').classList.add('active');
-        document.getElementById('game-title').innerText = title;
-        content.innerHTML = ""; ctrl.innerHTML = "";
-        score = 0; document.getElementById('score').innerText = 0;
+        document.getElementById('game-title').innerText = t;
+        score = 0; scoreVal.innerText = 0;
     }
 
-    function exitGame() { location.reload(); }
+    // 1. MENEBAK KATA (HANGMAN)
+    function startWord() {
+        openG("Menebak Kata");
+        const words = ["ABSENSI", "OFFLINE", "APPINVENTOR", "GITHUB", "KARYAWAN"];
+        let target = words[Math.floor(Math.random()*words.length)];
+        let guessed = [];
+        function update() {
+            let display = target.split('').map(l => guessed.includes(l) ? l : "_").join(" ");
+            area.innerHTML = `<h1>${display}</h1><input type="text" id="inp" maxlength="1" placeholder="Ketik 1 Huruf">`;
+            if(!display.includes("_")) { alert("Hebat!"); location.reload(); }
+            document.getElementById('inp').oninput = function() {
+                let char = this.value.toUpperCase();
+                if(char && !guessed.includes(char)) { guessed.push(char); if(target.includes(char)) score += 10; scoreVal.innerText = score; update(); }
+            };
+        }
+        update();
+    }
 
-    // 1. SNAKE
-    function playSnake() {
-        openScreen("Snake");
-        content.innerHTML = '<canvas id="c" width="280" height="280"></canvas>';
-        ctrl.innerHTML = '<div class="controls"><div></div><button class="btn-ctrl" onclick="d=\'U\'">▲</button><div></div><button class="btn-ctrl" onclick="d=\'L\'">◀</button><button class="btn-ctrl" onclick="d=\'D\'">▼</button><button class="btn-ctrl" onclick="d=\'R\'">▶</button></div>';
+    // 2. SIMON SAYS
+    function startSimon() {
+        openG("Simon Says");
+        let sequence = [], userSeq = [];
+        const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
+        area.innerHTML = `<div class="grid-color">${colors.map((c,i)=>`<div class="color-box" id="b${i}" onclick="checkS(${i})" style="background:${c}"></div>`).join('')}</div><p id="msg">Klik Mulai!</p><button onclick="nextS()" style="padding:10px">Mulai</button>`;
+        window.nextS = () => {
+            userSeq = []; sequence.push(Math.floor(Math.random()*4));
+            let i = 0;
+            let iv = setInterval(() => {
+                let b = document.getElementById('b'+sequence[i]);
+                b.style.opacity = "0.3"; setTimeout(()=>b.style.opacity="1", 300);
+                i++; if(i >= sequence.length) clearInterval(iv);
+            }, 600);
+        };
+        window.checkS = (idx) => {
+            userSeq.push(idx);
+            if(userSeq[userSeq.length-1] !== sequence[userSeq.length-1]) { alert("Salah!"); location.reload(); }
+            if(userSeq.length === sequence.length) { score++; scoreVal.innerText = score; setTimeout(nextS, 800); }
+        };
+    }
+
+    // 3. SUSUN MENARA
+    function startTower() {
+        openG("Susun Menara");
+        area.innerHTML = '<canvas id="c" width="300" height="300"></canvas><p>Klik saat balok sejajar!</p>';
         const ctx = document.getElementById('c').getContext('2d');
-        let b=20, s=[{x:140,y:140}], f={x:40,y:40}; window.d="R";
-        loop = setInterval(() => {
-            ctx.fillStyle="black"; ctx.fillRect(0,0,280,280);
-            ctx.fillStyle="red"; ctx.fillRect(f.x, f.y, b-2, b-2);
-            ctx.fillStyle="#38bdf8"; s.forEach(p=>ctx.fillRect(p.x,p.y,b-2,b-2));
-            let h={...s[0]};
-            if(d=="L") h.x-=b; if(d=="U") h.y-=b; if(d=="R") h.x+=b; if(d=="D") h.y+=b;
-            if(h.x==f.x && h.y==f.y){ score++; f={x:Math.floor(Math.random()*14)*b, y:Math.floor(Math.random()*14)*b}; } else s.pop();
-            if(h.x<0||h.x>=280||h.y<0||h.y>=280||s.some(p=>p.x==h.x&&p.y==h.y)){ alert("Kalah!"); exitGame(); }
-            s.unshift(h); document.getElementById('score').innerText = score;
-        }, 150);
+        let x = 0, w = 100, y = 270, speed = 3;
+        setInterval(() => {
+            ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,300,300);
+            ctx.fillStyle = "#10b981"; ctx.fillRect(x, y, w, 20);
+            x += speed; if(x > 300-w || x < 0) speed *= -1;
+        }, 20);
+        document.getElementById('c').onclick = () => {
+            score++; scoreVal.innerText = score;
+            y -= 25; if(y < 0) { alert("Menara Penuh! Menang!"); location.reload(); }
+        };
     }
 
-    // 2. MATH
-    function playMath() {
-        openScreen("Math Quiz");
-        let a, b, ans;
-        function n() {
-            a=Math.floor(Math.random()*20); b=Math.floor(Math.random()*20); ans=a+b;
-            content.innerHTML = `<h1>${a} + ${b} = ?</h1><input type="number" id="i" autofocus>`;
-            document.getElementById('i').oninput = function(){ if(this.value==ans){ score++; document.getElementById('score').innerText=score; n(); }};
+    // 4. CARI WARNA BEDA
+    function startDiff() {
+        openG("Cari Warna Beda");
+        function play() {
+            let r = Math.random()*255, g = Math.random()*255, b = Math.random()*255;
+            let diff = 40 - (score * 2); if(diff < 5) diff = 5;
+            let target = Math.floor(Math.random()*16);
+            area.innerHTML = `<div class="grid-color" style="grid-template-columns:repeat(4,1fr)">${Array(16).fill(0).map((_,i)=>`
+                <div class="color-box" onclick="${i==target?'winD()':'loseD()'}" 
+                style="background:rgb(${i==target?r+diff:r},${i==target?g+diff:g},${i==target?b+diff:b})"></div>`).join('')}</div>`;
         }
-        n();
+        window.winD = () => { score++; scoreVal.innerText = score; play(); };
+        window.loseD = () => { alert("Salah pilih!"); location.reload(); };
+        play();
     }
 
-    // 3. DINO
-    function playDino() {
-        openScreen("Dino Jump");
-        content.innerHTML = '<canvas id="c" width="300" height="150" onclick="j()"></canvas>';
-        const ctx=document.getElementById('c').getContext('2d');
-        let y=120, dy=0, ox=300;
-        window.j = () => { if(y==120) dy=-10; };
-        loop = setInterval(() => {
-            ctx.fillStyle="white"; ctx.fillRect(0,0,300,150);
-            dy+=0.8; y+=dy; if(y>120){ y=120; dy=0; }
-            ctx.fillStyle="black"; ctx.fillRect(40,y,20,30);
-            ox-=5; if(ox<-20){ ox=300; score++; document.getElementById('score').innerText=score; }
-            ctx.fillStyle="red"; ctx.fillRect(ox,130,20,20);
-            if(ox<60 && ox>20 && y>100){ alert("Game Over!"); exitGame(); }
-        }, 30);
-    }
-
-    // 4. CATCH ME
-    function playCatch() {
-        openScreen("Catch Target");
-        content.innerHTML = '<div id="a" style="height:250px; background:#1e293b; position:relative; border-radius:10px;"><div id="t" onclick="h()" style="position:absolute; font-size:40px; cursor:pointer;">🎯</div></div>';
-        window.h = () => { score++; document.getElementById('score').innerText=score; m(); };
-        function m() {
-            const t=document.getElementById('t');
-            t.style.left = Math.random()*200+'px'; t.style.top = Math.random()*180+'px';
-        }
-        m();
-    }
-
-    // 5. TEBAK ANGKA
-    function playGuess() {
-        openScreen("Tebak 1-100");
-        let t = Math.floor(Math.random()*100)+1;
-        content.innerHTML = '<input type="number" id="i" placeholder="Angka?"><p id="m">Masukkan angka dan tekan enter</p>';
-        document.getElementById('i').onchange = function() {
-            if(this.value == t){ alert("Hebat! Angkanya "+t); exitGame(); }
-            document.getElementById('m').innerText = this.value < t ? "Terlalu Rendah" : "Terlalu Tinggi";
-            this.value = "";
+    // 5. TES REAKSI
+    function startFast() {
+        openG("Tes Reaksi");
+        area.innerHTML = '<div id="box" onclick="hitF()" style="height:250px; background:red; display:flex; align-items:center; justify-content:center; cursor:pointer">Tunggu Hijau...</div>';
+        let start, active = false;
+        setTimeout(() => {
+            document.getElementById('box').style.background = "green";
+            document.getElementById('box').innerText = "KLIK SEKARANG!";
+            start = Date.now(); active = true;
+        }, 2000 + Math.random()*3000);
+        window.hitF = () => {
+            if(active) { alert("Reaksi Anda: " + (Date.now() - start) + "ms"); location.reload(); }
+            else { alert("Terlalu Cepat!"); location.reload(); }
         };
-    }
-
-    // 6. WHACK MOLE
-    function playWhack() {
-        openScreen("Whack a Mole");
-        content.innerHTML = '<div id="a" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">' + 
-            Array(9).fill('<div class="card" onclick="w(this)" style="height:80px; font-size:30px"></div>').join('') + '</div>';
-        window.w = (el) => { if(el.innerText=='🐭'){ score++; document.getElementById('score').innerText=score; el.innerText=''; } };
-        loop = setInterval(() => {
-            let cs = document.querySelectorAll('#a div');
-            cs.forEach(c=>c.innerText='');
-            cs[Math.floor(Math.random()*9)].innerText='🐭';
-        }, 800);
-    }
-
-    // 7. CLICKER
-    function playClicker() {
-        openScreen("Fast Clicker");
-        content.innerHTML = '<button onclick="c()" style="width:150px; height:150px; border-radius:50%; background:#38bdf8; font-size:20px; color:white; border:none;">KLIK SAYA!</button>';
-        window.c = () => { score++; document.getElementById('score').innerText=score; };
-    }
-
-    // 8. TICTACTOE
-    function playTic() {
-        openScreen("Tic Tac Toe");
-        content.innerHTML = '<div style="display:grid; grid-template-columns:repeat(3,80px); gap:5px; justify-content:center;">' + 
-            Array(9).fill(0).map((_,i)=>`<div class="card" onclick="t(this,${i})" style="height:80px; font-size:30px"></div>`).join('') + '</div>';
-        let b = Array(9).fill("");
-        window.t = (el, i) => {
-            if(b[i]=="" && score==0){ el.innerText="X"; b[i]="X"; 
-                let empty = b.map((v,idx)=>v==""?idx:null).filter(v=>v!==null);
-                if(empty.length>0){ let r=empty[Math.floor(Math.random()*empty.length)]; b[r]="O"; document.querySelectorAll('#game-content .card')[r].innerText="O"; }
-            }
-        };
-    }
-
-    // 9. MEMORY EMOJI
-    function playEmoji() {
-        openScreen("Memory Match");
-        let e = ['🍎','🍎','🍌','🍌','🍇','🍇','🍒','🍒'];
-        e.sort(()=>Math.random()-0.5);
-        content.innerHTML = '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px;">' + 
-            e.map(v=>`<div class="card" onclick="m(this,'${v}')" style="height:70px; font-size:25px">?</div>`).join('') + '</div>';
-        let first=null;
-        window.m = (el, v) => {
-            el.innerText = v;
-            if(!first) first = el;
-            else if(first.innerText == v){ score++; document.getElementById('score').innerText=score; first=null; }
-            else { setTimeout(()=>{ el.innerText='?'; first.innerText='?'; first=null; }, 500); }
-        };
-    }
-
-    // 10. PONG
-    function playPong() {
-        openScreen("Pong");
-        content.innerHTML = '<canvas id="c" width="300" height="200"></canvas>';
-        const ctx=document.getElementById('c').getContext('2d');
-        let px=110, bx=150, by=100, bdx=3, bdy=3;
-        ctrl.innerHTML = '<input type="range" min="0" max="240" oninput="window.px=this.value" style="width:100%">';
-        window.px = 110;
-        loop = setInterval(() => {
-            ctx.fillStyle="black"; ctx.fillRect(0,0,300,200);
-            ctx.fillStyle="white"; ctx.fillRect(px, 185, 60, 10);
-            ctx.beginPath(); ctx.arc(bx,by,5,0,7); ctx.fill();
-            bx+=bdx; by+=bdy;
-            if(bx<0||bx>300) bdx*=-1; if(by<0) bdy*=-1;
-            if(by>180 && bx>px && bx<px+60){ bdy*=-1; score++; document.getElementById('score').innerText=score; }
-            if(by>200){ alert("Kalah!"); exitGame(); }
-        }, 30);
     }
 </script>
 </body>
