@@ -48,7 +48,16 @@
         #winning-line { position: absolute; background: #f43f5e; display: none; z-index: 10; border-radius: 10px; box-shadow: 0 0 15px #f43f5e; pointer-events: none; }
 
         /* Snake & Mole Canvas */
-        canvas { background: #1e293b; border-radius: 15px; border: 2px solid #334155; max-width: 90vw; max-height: 50vh; }
+        canvas { background: #1e293b; border-radius: 15px; border: 2px solid #334155; max-width: 90vw; max-height: 45vh; }
+
+        /* Snake Controls (D-Pad) */
+        .snake-controls { display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(2, 60px); gap: 10px; margin-top: 15px; }
+        .ctrl-btn { background: #334155; border: 2px solid #38bdf8; color: white; border-radius: 12px; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .ctrl-btn:active { background: #38bdf8; color: #0f172a; }
+        .up { grid-column: 2; }
+        .left { grid-column: 1; grid-row: 2; }
+        .down { grid-column: 2; grid-row: 2; }
+        .right { grid-column: 3; grid-row: 2; }
 
         /* Math Quiz Box */
         .math-box { background: #1e293b; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #38bdf8; width: 80%; max-width: 300px; }
@@ -56,10 +65,9 @@
         #math-ans { width: 100%; padding: 10px; font-size: 24px; border-radius: 8px; border: none; text-align: center; background: #334155; color: white; }
 
         /* Global UI Elements */
-        .status { margin-top: 15px; font-size: 16px; color: #94a3b8; height: 20px; }
-        .btn-group { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .status { margin-top: 10px; font-size: 16px; color: #94a3b8; height: 20px; }
+        .btn-group { margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
         button { padding: 10px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:active { transform: scale(0.9); }
         .btn-back { background: #ef4444; color: white; width: 200px; margin-top: 10px; }
         .btn-reset { background: #334155; color: white; }
         .btn-start { background: #10b981; color: white; font-size: 18px; padding: 15px 30px; }
@@ -114,7 +122,15 @@
                 </select>
             </div>
             <canvas id="snakeCanvas" width="400" height="400"></canvas>
-            <div id="snake-ui" style="margin-top: 15px;">
+            
+            <div id="snake-controls-ui" class="snake-controls" style="display: none;">
+                <div class="ctrl-btn up" onclick="changeSnakeDir('UP')">▲</div>
+                <div class="ctrl-btn left" onclick="changeSnakeDir('LEFT')">◀</div>
+                <div class="ctrl-btn down" onclick="changeSnakeDir('DOWN')">▼</div>
+                <div class="ctrl-btn right" onclick="changeSnakeDir('RIGHT')">▶</div>
+            </div>
+
+            <div id="snake-ui-start" style="margin-top: 15px;">
                 <button id="btn-start-snake" class="btn-start" onclick="startSnakeLoop()">MULAI GAME</button>
             </div>
             <div class="status" id="snake-status">Skor: 0</div>
@@ -172,7 +188,7 @@
 
         function goToMenu() { location.reload(); }
 
-        /* --- 1. LOGIKA TIC TAC TOE (ASLI) --- */
+        /* --- 1. LOGIKA TIC TAC TOE (KODE ASLI) --- */
         let board = ["", "", "", "", "", "", "", "", ""];
         let huPlayer = "X"; let aiPlayer = "O"; let gameActive = true;
         const winConditions = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
@@ -185,7 +201,6 @@
                 else { checkGameStatus(); }
             }
         }
-
         function aiMove() {
             const diff = document.getElementById('difficulty').value;
             let move; let rand = Math.random();
@@ -195,12 +210,10 @@
             else move = minimax(board, aiPlayer).index;
             board[move] = aiPlayer; updateDisplay(); checkGameStatus();
         }
-
         function randomMove() {
             let avail = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
             return avail[Math.floor(Math.random() * avail.length)];
         }
-
         function minimax(newBoard, player) {
             let availSpots = newBoard.map((v, i) => v === "" ? i : null).filter(v => v !== null);
             if (checkWin(newBoard, huPlayer)) return {score: -10};
@@ -224,16 +237,13 @@
             }
             return moves[bestMove];
         }
-
         function checkWin(b, p) {
             for (let i = 0; i < winConditions.length; i++) {
                 if (b[winConditions[i][0]] === p && b[winConditions[i][1]] === p && b[winConditions[i][2]] === p) return {index: i, player: p};
             }
             return null;
         }
-
         function checkTie() { return board.filter(s => s === "").length === 0; }
-
         function checkGameStatus() {
             let win = checkWin(board, huPlayer) || checkWin(board, aiPlayer);
             if (win) {
@@ -247,7 +257,6 @@
                 document.getElementById('status').innerText = "Seri!"; gameActive = false;
             }
         }
-
         function updateDisplay() {
             const cells = document.querySelectorAll('#screen-ttt .cell');
             board.forEach((val, i) => {
@@ -255,15 +264,22 @@
                 cells[i].className = val === "X" ? "cell x-color" : (val === "O" ? "cell o-color" : "cell");
             });
         }
-
         function resetGame() {
             board = ["", "", "", "", "", "", "", "", ""];
             gameActive = true; document.getElementById('winning-line').style.display = "none";
             document.getElementById('status').innerText = "Giliran Kamu"; updateDisplay();
         }
 
-        /* --- 2. LOGIKA SNAKE (LEBAR 400 & TOMBOL MULAI) --- */
+        /* --- 2. LOGIKA SNAKE --- */
         let snake, food, snakeDir, snakeScore, snakeLoop;
+        
+        function changeSnakeDir(newDir) {
+            if(newDir === "UP" && snakeDir !== "DOWN") snakeDir = "UP";
+            if(newDir === "DOWN" && snakeDir !== "UP") snakeDir = "DOWN";
+            if(newDir === "LEFT" && snakeDir !== "RIGHT") snakeDir = "LEFT";
+            if(newDir === "RIGHT" && snakeDir !== "LEFT") snakeDir = "RIGHT";
+        }
+
         function initSnake() {
             clearInterval(snakeLoop);
             const canvas = document.getElementById('snakeCanvas');
@@ -272,6 +288,7 @@
             snake = [{x: 10*box, y: 10*box}]; food = {x: 5*box, y: 5*box};
             snakeDir = "RIGHT"; snakeScore = 0;
             document.getElementById('btn-start-snake').style.display = "inline-block";
+            document.getElementById('snake-controls-ui').style.display = "none";
             document.getElementById('snake-status').innerText = "Klik Mulai untuk bermain";
             ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,400,400);
             ctx.fillStyle = "#38bdf8"; ctx.fillRect(snake[0].x, snake[0].y, box-1, box-1);
@@ -279,16 +296,17 @@
 
         function startSnakeLoop() {
             document.getElementById('btn-start-snake').style.display = "none";
+            document.getElementById('snake-controls-ui').style.display = "grid";
             const canvas = document.getElementById('snakeCanvas');
             const ctx = canvas.getContext('2d');
             const box = 20;
             const speed = parseInt(document.getElementById('snake-level').value);
 
             document.onkeydown = (e) => {
-                if(e.key === "ArrowUp" && snakeDir !== "DOWN") snakeDir = "UP";
-                if(e.key === "ArrowDown" && snakeDir !== "UP") snakeDir = "DOWN";
-                if(e.key === "ArrowLeft" && snakeDir !== "RIGHT") snakeDir = "LEFT";
-                if(e.key === "ArrowRight" && snakeDir !== "LEFT") snakeDir = "RIGHT";
+                if(e.key === "ArrowUp") changeSnakeDir("UP");
+                if(e.key === "ArrowDown") changeSnakeDir("DOWN");
+                if(e.key === "ArrowLeft") changeSnakeDir("LEFT");
+                if(e.key === "ArrowRight") changeSnakeDir("RIGHT");
             };
 
             snakeLoop = setInterval(() => {
@@ -318,24 +336,17 @@
             }, speed);
         }
 
-        /* --- 3. LOGIKA MATH QUIZ (VARIASI OPERATOR) --- */
+        /* --- 3. LOGIKA MATH QUIZ --- */
         let mathAns, mathScore = 0;
         function nextMath() {
             const level = parseInt(document.getElementById('math-level').value);
             const ops = ['+', '-', '*', '/'];
             const op = ops[Math.floor(Math.random() * ops.length)];
             let a, b;
-
-            if (op === '+') {
-                a = Math.floor(Math.random() * level); b = Math.floor(Math.random() * level); mathAns = a + b;
-            } else if (op === '-') {
-                a = Math.floor(Math.random() * level) + level; b = Math.floor(Math.random() * level); mathAns = a - b;
-            } else if (op === '*') {
-                a = Math.floor(Math.random() * (level/5)) + 1; b = Math.floor(Math.random() * 10) + 1; mathAns = a * b;
-            } else if (op === '/') {
-                mathAns = Math.floor(Math.random() * 10) + 1; b = Math.floor(Math.random() * 10) + 1; a = mathAns * b;
-            }
-
+            if (op === '+') { a = Math.floor(Math.random() * level); b = Math.floor(Math.random() * level); mathAns = a + b; }
+            else if (op === '-') { a = Math.floor(Math.random() * level) + level; b = Math.floor(Math.random() * level); mathAns = a - b; }
+            else if (op === '*') { a = Math.floor(Math.random() * (level/5)) + 1; b = Math.floor(Math.random() * 10) + 1; mathAns = a * b; }
+            else if (op === '/') { mathAns = Math.floor(Math.random() * 10) + 1; b = Math.floor(Math.random() * 10) + 1; a = mathAns * b; }
             document.getElementById('math-q').innerText = `${a} ${op === '*' ? '×' : op === '/' ? '÷' : op} ${b}`;
             document.getElementById('math-ans').value = ""; document.getElementById('math-ans').focus();
         }
@@ -354,8 +365,9 @@
             const speed = document.getElementById('mole-level').value;
             canvas.onclick = (e) => {
                 const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-                const col = Math.floor(x/(rect.width/3)); const row = Math.floor(y/(rect.height/3));
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                const col = Math.floor(x/100); const row = Math.floor(y/100);
                 if(row*3 + col === moleIdx) { moleScore++; document.getElementById('mole-status').innerText = "Skor: " + moleScore; moleIdx = -1; drawMole(); }
             };
             function drawMole() {
