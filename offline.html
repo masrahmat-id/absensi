@@ -13,7 +13,6 @@
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        /* CSS UPDATE: Memastikan Full Layar & Anti-Scroll */
         body, html {
             margin: 0; padding: 0; 
             width: 100vw; 
@@ -79,11 +78,48 @@
         .btn-back { background: #ef4444; color: white; width: 200px; margin-top: 10px; }
         .btn-reset { background: #334155; color: white; }
         .btn-start { background: #10b981; color: white; font-size: 18px; padding: 15px 30px; }
+
+        /* CSS TAMBAHAN UNTUK MODAL */
+        #custom-alert {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid #38bdf8;
+            text-align: center;
+            width: 85%;
+            max-width: 320px;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+        }
+        .modal-btn {
+            background: #38bdf8;
+            color: #0f172a;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
 
     <div id="main-container">
+        <div id="custom-alert">
+            <div class="modal-content">
+                <h2 style="color: #fb7185; margin: 0 0 10px 0;">GAME OVER!</h2>
+                <p id="modal-message" style="font-size: 18px; line-height: 1.5;"></p>
+                <button class="modal-btn" onclick="closeModal()">OKE</button>
+            </div>
+        </div>
         
         <div id="game-menu" class="active game-screen" style="display: grid;">
             <h1 style="grid-column: span 2; text-align: center;">OFFLINE GAMES</h1>
@@ -181,21 +217,29 @@
     </div>
 
     <script>
+        /* --- LOGIKA CUSTOM MODAL --- */
+        let modalActive = false;
+        function showCustomAlert(msg) {
+            document.getElementById('modal-message').innerText = msg;
+            document.getElementById('custom-alert').style.display = 'flex';
+            modalActive = true;
+        }
+        function closeModal() {
+            document.getElementById('custom-alert').style.display = 'none';
+            modalActive = false;
+        }
+
         /* --- AUTO FULLSCREEN LOGIC --- */
         function activateFullScreen() {
             const docElm = document.documentElement;
-            if (docElm.requestFullscreen) {
-                docElm.requestFullscreen();
-            } else if (docElm.webkitRequestFullscreen) {
-                docElm.webkitRequestFullscreen();
-            } else if (docElm.msRequestFullscreen) {
-                docElm.msRequestFullscreen();
-            }
+            if (docElm.requestFullscreen) { docElm.requestFullscreen(); } 
+            else if (docElm.webkitRequestFullscreen) { docElm.webkitRequestFullscreen(); } 
+            else if (docElm.msRequestFullscreen) { docElm.msRequestFullscreen(); }
         }
 
         /* --- NAVIGASI --- */
         function showGame(id) {
-            activateFullScreen(); // Picu fullscreen saat klik game
+            activateFullScreen();
             document.querySelectorAll('.game-screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
             const target = document.getElementById('screen-' + id);
             target.classList.add('active');
@@ -326,6 +370,7 @@
                 if(e.key === "ArrowRight") changeSnakeDir("RIGHT");
             };
             snakeLoop = setInterval(() => {
+                if(modalActive) return; // Jeda jika modal muncul
                 ctx.fillStyle = "#1e293b"; ctx.fillRect(0,0,400,400);
                 for(let i=0; i<snake.length; i++) {
                     ctx.fillStyle = i==0 ? "#38bdf8" : "#94a3b8";
@@ -343,7 +388,10 @@
                 } else snake.pop();
                 let newHead = {x: headX, y: headY};
                 if(headX<0||headX>=400||headY<0||headY>=400||snake.some(s=>s.x==newHead.x&&s.y==newHead.y)) {
-                    clearInterval(snakeLoop); setTimeout(() => { alert("Game Over! Skor: " + snakeScore); initSnake(); }, 100); return;
+                    clearInterval(snakeLoop); 
+                    showCustomAlert("Game Over! Skor Kamu: " + snakeScore); 
+                    initSnake(); 
+                    return;
                 }
                 snake.unshift(newHead);
             }, speed);
@@ -379,7 +427,10 @@
                    mathScore++; document.getElementById('math-status').innerText = "Skor: " + mathScore; nextMath();
                } else {
                    mathLives--; updateMathLives();
-                   if(mathLives <= 0) { alert("Game Over! Skor Akhir: " + mathScore); resetMath(); } 
+                   if(mathLives <= 0) { 
+                       showCustomAlert("Game Over! Skor Akhir: " + mathScore); 
+                       resetMath(); 
+                   } 
                    else { nextMath(); }
                }
             }
@@ -407,6 +458,7 @@
             const ctx = canvas.getContext('2d');
             
             canvas.onclick = (e) => {
+                if(modalActive) return;
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX - rect.left) * (canvas.width / rect.width);
                 const y = (e.clientY - rect.top) * (canvas.height / rect.height);
@@ -424,7 +476,7 @@
                     carrotIndices = carrotIndices.filter(i => i !== clickedIdx);
                     drawMole();
                     if(moleLives <= 0) {
-                        alert("Kalah! Kamu memukul wortel. Skor Akhir: " + moleScore);
+                        showCustomAlert("Yah! Kamu memukul wortel. Skor Akhir: " + moleScore);
                         initMole();
                     }
                 }
@@ -452,6 +504,7 @@
             else { speed = 600; carrotCount = 5; }
 
             moleLoop = setInterval(() => { 
+                if(modalActive) return;
                 rabbitIdx = Math.floor(Math.random()*9);
                 carrotIndices = [];
                 while(carrotIndices.length < carrotCount) {
