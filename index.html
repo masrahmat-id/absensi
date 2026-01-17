@@ -126,8 +126,8 @@
         #settings-modal, #about-pop-up {
             display: none; position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%); background: var(--bg-card);
-            padding: 25px; border-radius: 20px; border: 3px solid var(--primary);
-            z-index: 10000; width: 85%; max-width: 320px;
+            padding: 15px; border-radius: 20px; border: 2px solid var(--primary);
+            z-index: 10000; width: 88%; max-width: 340px;
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
             max-height: 85vh; overflow-y: auto;
         }
@@ -136,25 +136,34 @@
 
         .modal-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; border-bottom: 1px solid var(--primary); padding-bottom: 10px;
+            margin-bottom: 10px; border-bottom: 1px solid var(--primary); padding-bottom: 8px;
         }
 
-        .btn-close-modal { background: none; border: none; color: var(--text-main); font-size: 30px; font-weight: bold; cursor: pointer; line-height: 1; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; gap: 10px; }
-        .btn-save { width: 100%; padding: 15px; background: var(--primary); color: white; font-weight: bold; border: none; border-radius: 12px; margin-top: 25px; cursor: pointer; }
+        .btn-close-modal { background: none; border: none; color: var(--text-main); font-size: 24px; font-weight: bold; cursor: pointer; }
+        
+        /* Simpler Setting Items */
+        .setting-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-top: 8px; gap: 8px; font-size: 13px;
+        }
+        .setting-item span { opacity: 0.9; }
+        
+        input[type="range"] { height: 4px; flex-grow: 1; }
+        input[type="color"] { border: none; width: 30px; height: 25px; background: none; cursor: pointer; }
+
+        .btn-save { width: 100%; padding: 12px; background: var(--primary); color: white; font-weight: bold; border: none; border-radius: 10px; margin-top: 15px; cursor: pointer; }
 
         .btn-database-trigger {
-            margin-top: 20px; padding: 12px; border: 2px solid var(--primary); border-radius: 12px; 
-            cursor: pointer; font-size: 14px; font-weight: 800; color: white; background: var(--primary);
-            text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-top: 15px; padding: 10px; border: 1.5px solid var(--primary); border-radius: 10px; 
+            cursor: pointer; font-size: 12px; font-weight: 800; color: white; background: var(--primary);
+            text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px;
             width: 100%; box-sizing: border-box; text-decoration: none;
-            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4); transition: all 0.3s ease;
         }
 
         .btn-about-trigger {
-            margin-top: 10px; padding: 10px; border: 1px solid var(--primary);
-            border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: bold;
-            color: var(--primary); background: rgba(46, 204, 113, 0.1);
+            margin-top: 8px; padding: 8px; border: 1px solid var(--primary);
+            border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold;
+            color: var(--primary); background: rgba(46, 204, 113, 0.05);
             text-align: center; display: block;
         }
 
@@ -171,9 +180,11 @@
         }
 
         #gradient-controls {
-            display: none; border-top: 1px dashed var(--primary);
-            margin-top: 10px; padding-top: 10px;
+            display: none; border-top: 1px dashed rgba(46, 204, 113, 0.3);
+            margin-top: 8px; padding-top: 5px;
         }
+
+        .section-title { font-size: 10px; font-weight: bold; color: var(--primary); opacity: 0.7; margin-top: 10px; text-transform: uppercase; }
 
         #keterangan option[disabled] { display: none; }
     </style>
@@ -216,50 +227,59 @@
 
         <div id="settings-modal">
             <div class="modal-header">
-                <h3 style="margin:0; color:var(--primary);">⚙ Pengaturan</h3>
+                <span style="font-weight: bold; color:var(--primary); font-size: 16px;">Pengaturan</span>
                 <button class="btn-close-modal" onclick="cancelSettings()">×</button>
             </div>
             
-            <label style="font-size: 11px; opacity: 0.6; display:block;">SUARA NOTIFIKASI:</label>
-            <select id="sound-choice" style="width:100%; height: 40px; margin-bottom:10px; border-radius: 8px;">
-                <option value="Notif01.mp3">Notif 01</option>
-                <option value="Notif02.mp3">Notif 02</option>
-                <option value="Notif03.mp3">Notif 03</option>
-                <option value="Done.mp3">Done</option>
-                <option value="Mission-success.mp3">Mission Success</option>
-                <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
-                <option value="Yayyy.mp3">Yayyy...!!</option>
-            </select>
+            <div class="section-title">Umum & Suara</div>
+            <div class="setting-item">
+                <span>Notifikasi</span>
+                <select id="sound-choice" style="height: 28px; font-size: 12px; padding: 0 5px; border-radius: 5px; width: 60%;">
+                    <option value="Notif01.mp3">Notif 01</option>
+                    <option value="Notif02.mp3">Notif 02</option>
+                    <option value="Notif03.mp3">Notif 03</option>
+                    <option value="Done.mp3">Done</option>
+                    <option value="Mission-success.mp3">Mission Success</option>
+                    <option value="Success-fanfare-trumpets.mp3">Success Fanfare</option>
+                    <option value="Yayyy.mp3">Yayyy...!!</option>
+                </select>
+            </div>
 
-            <div class="setting-item"><span>Ukuran Logo</span><input type="range" id="range-logo" min="40" max="110" oninput="previewLayout()"></div>
-            <div class="setting-item"><span>Ukuran Tulisan</span><input type="range" id="range-font" min="0.5" max="1.5" step="0.05" oninput="previewLayout()"></div>
-            <div class="setting-item"><span>Warna Tulisan</span><input type="color" id="color-text" oninput="previewLayout()"></div>
-            <div class="setting-item"><span>Warna Garis Tema</span><input type="color" id="color-picker" oninput="previewLayout()"></div>
-            <div class="setting-item"><span>Warna Latar (Solid)</span><input type="color" id="color-bg" oninput="previewLayout()"></div>
+            <div class="section-title">Tampilan Visual</div>
+            <div class="setting-item"><span>Logo</span><input type="range" id="range-logo" min="40" max="110" oninput="previewLayout()"></div>
+            <div class="setting-item"><span>Font</span><input type="range" id="range-font" min="0.5" max="1.5" step="0.05" oninput="previewLayout()"></div>
             
             <div class="setting-item">
-                <span style="font-weight: bold; color: var(--primary);">AKTIFKAN GRADIEN</span>
+                <span>Teks</span><input type="color" id="color-text" oninput="previewLayout()">
+                <span>Tema</span><input type="color" id="color-picker" oninput="previewLayout()">
+                <span>Latar</span><input type="color" id="color-bg" oninput="previewLayout()">
+            </div>
+            
+            <div class="setting-item" style="background: rgba(46, 204, 113, 0.1); padding: 5px; border-radius: 5px;">
+                <span style="font-weight: bold;">Gunakan Gradien</span>
                 <input type="checkbox" id="gradient-toggle" onchange="previewLayout()">
             </div>
 
             <div id="gradient-controls">
-                <div class="setting-item"><span>Warna Atas</span><input type="color" id="grad-1" oninput="previewLayout()"></div>
-                <div class="setting-item"><span>Warna Tengah</span><input type="color" id="grad-2" oninput="previewLayout()"></div>
-                <div class="setting-item"><span>Warna Bawah</span><input type="color" id="grad-3" oninput="previewLayout()"></div>
                 <div class="setting-item">
-                    <span>Arah</span>
-                    <select id="grad-dir" onchange="previewLayout()" style="height: 30px; font-size: 12px;">
-                        <option value="180deg">Vertikal ↓</option>
-                        <option value="90deg">Horizontal →</option>
-                        <option value="45deg">Diagonal ↘</option>
+                    <span>Atas</span><input type="color" id="grad-1" oninput="previewLayout()">
+                    <span>Tengah</span><input type="color" id="grad-2" oninput="previewLayout()">
+                    <span>Bawah</span><input type="color" id="grad-3" oninput="previewLayout()">
+                </div>
+                <div class="setting-item">
+                    <span>Arah Aliran</span>
+                    <select id="grad-dir" onchange="previewLayout()" style="height: 25px; font-size: 11px; width: 100px;">
+                        <option value="180deg">Vertikal</option>
+                        <option value="90deg">Horizontal</option>
+                        <option value="45deg">Diagonal</option>
                     </select>
                 </div>
             </div>
 
-            <div class="setting-item"><span>Mode Terang</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
+            <div class="setting-item"><span>Mode Terang (Light)</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
 
             <a href="https://azzahrolocare.github.io/rekap-absensi/" target="_blank" class="btn-database-trigger" id="btn-rekap">
-                BUKA REKAPITULASI PRESENSI SISWA
+                REKAPITULASI PRESENSI SISWA
             </a>
 
             <div class="btn-about-trigger" onclick="showAbout()">ⓘ Tentang Aplikasi</div>
@@ -268,22 +288,16 @@
         </div>
 
         <div id="about-pop-up">
-            <h3 style="color:var(--primary); margin-top:0;">Tentang Aplikasi</h3>
-            <p style="font-size:13px; line-height:1.6; text-align: left;">
-"Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro hadir sebagai solusi inovatif 
-dalam mendukung digitalisasi pendidikan serta efisiensi administrasi sekolah.<br>
-Dengan fokus mentransformasi presensi konvensional menjadi sistem otomatis berbasis QR Code,
-aplikasi ini memastikan pendataan kehadiran berjalan cepat dan akurat.<br>
-Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi secara otomatis tanpa perlu rekapitulasi manual di akhir hari."
+            <h3 style="color:var(--primary); margin-top:0; font-size: 18px;">Tentang</h3>
+            <p style="font-size:12px; line-height:1.5; text-align: left; opacity: 0.9;">
+"Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro hadir sebagai solusi inovatif dalam mendukung digitalisasi pendidikan serta efisiensi administrasi sekolah."
             </p>
-            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; font-size:12px; text-align:left;">
-                <p><div style="text-align: center; font-size:15px; font-weight: bold;">
-                IT DIGITALIZATION</div>
-                    <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 20px;">SMP ISLAM AZ-ZAHRO & SMK AZ-ZAHRO</div>
-                    <strong>Created by ops:</strong> Rahmattullah<br></p>
-                <p><strong>Email:</strong> mas.rahmat.id@gmail.com</p>
+            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; font-size:11px; text-align:left; border-left: 3px solid var(--primary);">
+                <p><strong>IT DIGITALIZATION:</strong> SMP Islam & SMK Az-Zahro<br>
+                <strong>Created by ops:</strong> Rahmattullah<br>
+                <strong>Email:</strong> mas.rahmat.id@gmail.com</p>
             </div>
-            <button class="btn-save" style="margin-top:15px; padding:10px;" onclick="closeAbout()">TUTUP</button>
+            <button class="btn-save" style="margin-top:10px; padding:8px;" onclick="closeAbout()">TUTUP</button>
         </div>
     </div>
 
@@ -331,7 +345,6 @@ Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi se
             document.getElementById('color-text').value = config.textColor;
             document.getElementById('color-bg').value = config.bgColor || '#121212';
             document.getElementById('theme-toggle').checked = (config.theme === 'light');
-            
             document.getElementById('gradient-toggle').checked = config.useGrad;
             document.getElementById('grad-1').value = config.g1;
             document.getElementById('grad-2').value = config.g2;
