@@ -162,12 +162,11 @@
         }
         
         #keterangan option[disabled] {
-            display: none;
+            display: none; /* Menghilangkan opsi dari daftar setelah diklik */
         }
     </style>
 </head>
-<body data-theme="dark" onclick="toggleFullscreen()"> 
-    <div id="status-kirim"></div>
+<body data-theme="dark" onclick="toggleFullscreen()"> <div id="status-kirim"></div>
     <div id="about-overlay" class="overlay-about" onclick="closeAbout()"></div>
 
     <div class="main-app">
@@ -230,18 +229,25 @@
             <div class="setting-item"><span>Mode Terang</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
 
             <div class="btn-about-trigger" onclick="showAbout()">ⓘ Tentang Aplikasi</div>
+
             <button class="btn-save" onclick="saveSettings()">SIMPAN</button>
         </div>
 
         <div id="about-pop-up">
             <h3 style="color:var(--primary); margin-top:0;">Tentang Aplikasi</h3>
             <p style="font-size:13px; line-height:1.6; text-align: left;">
-                "Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro hadir sebagai solusi inovatif dalam mendukung digitalisasi pendidikan serta efisiensi administrasi sekolah."
+"Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro hadir sebagai solusi inovatif 
+dalam mendukung digitalisasi pendidikan serta efisiensi administrasi sekolah.<br>
+Dengan fokus mentransformasi presensi konvensional menjadi sistem otomatis berbasis QR Code,
+aplikasi ini memastikan pendataan kehadiran berjalan cepat dan akurat.<br>
+Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi secara otomatis tanpa perlu rekapitulasi manual di akhir hari.<br>
+Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sekolah, yakni meningkatkan kualitas kegiatan belajar mengajar."
             </p>
             <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; font-size:12px; text-align:left;">
-                <div style="text-align: center; font-size:15px; font-weight: bold;">IT DIGITALIZATION</div>
-                <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 10px;">SMP ISLAM AZ-ZAHRO & SMK AZ-ZAHRO</div>
-                <p><strong>Created by ops:</strong> Rahmattullah</p>
+                <p><div style="text-align: center; font-size:15px; font-weight: bold;">
+                IT DIGITALIZATION</div>
+                    <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 20px;">SMP ISLAM AZ-ZAHRO & SMK AZ-ZAHRO</div>
+                    <strong>Created by ops:</strong> Rahmattullah<br></p>
                 <p><strong>Email:</strong> mas.rahmat.id@gmail.com</p>
             </div>
             <button class="btn-save" style="margin-top:15px; padding:10px;" onclick="closeAbout()">TUTUP</button>
@@ -249,19 +255,19 @@
     </div>
 
     <script>
-        // GLOBAL VARIABLES
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwCXbDTuaFkN7GlcXJxaFgDaKPEp2G9vySF1IKfWxUCTuEOCYt39nMmlEmI25pz4PSd/exec';
-        const rawURL = 'https://github.com/masrahmat-id/absensi/raw/main/';
-        let isProcessing = false;
-        let deferredPrompt;
-
-        // 1. FULLSCREEN & CLOCK
+        // FUNGSI BARU UNTUK FULLSCREEN
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => console.log(err.message));
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
                 document.getElementById('fullscreen-info').style.display = 'none';
             }
         }
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwCXbDTuaFkN7GlcXJxaFgDaKPEp2G9vySF1IKfWxUCTuEOCYt39nMmlEmI25pz4PSd/exec';
+        const rawURL = 'https://github.com/masrahmat-id/absensi/raw/main/';
+        let isProcessing = false;
 
         function updateClock() {
             const now = new Date();
@@ -269,25 +275,18 @@
             const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
             document.getElementById('clock-display').innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} | ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`.toUpperCase();
         }
-        setInterval(updateClock, 1000); 
-        updateClock();
+        setInterval(updateClock, 1000); updateClock();
 
-        // 2. MODAL CONTROLS
         function showAbout() {
             document.getElementById('about-pop-up').style.display = 'block';
             document.getElementById('about-overlay').style.display = 'block';
         }
+
         function closeAbout() {
             document.getElementById('about-pop-up').style.display = 'none';
             document.getElementById('about-overlay').style.display = 'none';
         }
-        function toggleSettings() {
-            const m = document.getElementById('settings-modal');
-            m.style.display = m.style.display === 'block' ? 'none' : 'block';
-        }
-        function cancelSettings() { applySettings(); toggleSettings(); }
 
-        // 3. SETTINGS ENGINE
         function applySettings() {
             const config = JSON.parse(localStorage.getItem('absensiConfig')) || {
                 sound: 'Notif01.mp3', theme: 'dark', primary: '#2ecc71',
@@ -299,8 +298,6 @@
             document.documentElement.style.setProperty('--header-font-size', config.fontSize + 'rem');
             document.documentElement.style.setProperty('--header-text-color', config.textColor);
             document.documentElement.style.setProperty('--bg-body', config.bgColor);
-            
-            // Sync Input UI
             document.getElementById('sound-choice').value = config.sound;
             document.getElementById('color-picker').value = config.primary;
             document.getElementById('range-logo').value = config.logoSize;
@@ -319,6 +316,13 @@
             document.body.setAttribute('data-theme', document.getElementById('theme-toggle').checked ? 'light' : 'dark');
         }
 
+        function toggleSettings() {
+            const m = document.getElementById('settings-modal');
+            m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function cancelSettings() { applySettings(); toggleSettings(); }
+
         function saveSettings() {
             const config = {
                 sound: document.getElementById('sound-choice').value,
@@ -334,61 +338,101 @@
             toggleSettings();
         }
 
-        // 4. QR SCANNER ENGINE
         applySettings();
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 25, qrbox: { width: 280, height: 280 }, aspectRatio: 0.75 }, 
-        (decodedText) => {
-            if (isProcessing) return;
+(decodedText) => {
+    if (isProcessing) return;
 
-            const ketValue = document.getElementById('keterangan').value;
-            if (!ketValue) {
-                const s = document.getElementById('status-kirim');
-                s.innerText = "✖ GAGAL: PILIH KETERANGAN DULU!";
-                s.style.backgroundColor = "#e74c3c";
-                s.style.display = "block";
-                setTimeout(() => { s.style.display = "none"; s.style.backgroundColor = "var(--primary)"; }, 2000);
-                return;
-            }
+    // --- VALIDASI KETERANGAN ---
+    const ketValue = document.getElementById('keterangan').value;
+    if (!ketValue || ketValue === "") {
+        const s = document.getElementById('status-kirim');
+        s.innerText = "✖ GAGAL: PILIH KETERANGAN DULU!";
+        s.style.backgroundColor = "#e74c3c"; // Warna merah untuk error
+        s.style.display = "block";
+        
+        // Mainkan suara peringatan jika perlu (opsional)
+        new Audio('error-sound.mp3').play().catch(() => {});
 
-            isProcessing = true;
-            document.getElementById('last-name-display').value = decodedText;
-            const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
-            new Audio(rawURL + config.sound).play().catch(() => {});
-            
-            fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ketValue)}`, { method: 'GET', mode: 'no-cors' });
-            
-            const s = document.getElementById('status-kirim');
-            s.innerText = "✔ TERKIRIM: " + decodedText;
-            s.style.display = "block";
-            setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
-        }).catch(err => console.error(err));
+        setTimeout(() => { 
+            s.style.display = "none"; 
+            s.style.backgroundColor = "var(--primary)"; // Kembalikan ke warna asli
+        }, 2000);
+        return; // Berhenti di sini, jangan kirim data
+    }
+    // ---------------------------
 
-        // 5. SERVICE WORKER & PWA LOGIC (DIPERBAIKI/DIPADUKAN)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('SW terdaftar'))
-                .catch(err => console.log('SW Gagal:', err));
-            });
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            setTimeout(() => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then((choice) => {
-                        deferredPrompt = null;
-                    });
-                }
-            }, 2000); 
-        });
-
-        window.addEventListener('appinstalled', () => {
-            document.getElementById('fullscreen-info').style.display = 'none';
-        });
+    isProcessing = true;
+    document.getElementById('last-name-display').value = decodedText;
+    const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
+    new Audio(rawURL + config.sound).play().catch(() => {});
+    
+    // Kirim data hanya jika lolos validasi di atas
+    fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ketValue)}`, { method: 'GET', mode: 'no-cors' });
+    
+    const s = document.getElementById('status-kirim');
+    s.innerText = "✔ TERKIRIM: " + decodedText;
+    s.style.display = "block";
+    setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
+    }).catch(err => console.error(err));
     </script>
+
+    <script>
+  // 1. Registrasi Service Worker Anda (sw.js)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('SW terdaftar dengan versi: 1.0.1'))
+        .catch(err => console.log('SW Gagal:', err));
+    });
+  }
+
+  // 2. Logika Pemicu Instalasi Otomatis
+  let deferredPrompt;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Mencegah browser menampilkan prompt default (agar kita bisa kontrol waktunya)
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Munculkan prompt otomatis setelah 2 detik halaman dimuat
+    setTimeout(() => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt(); // Tampilkan jendela instalasi
+        
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User menginstal aplikasi');
+          } else {
+            console.log('User menolak instalasi');
+          }
+          deferredPrompt = null;
+        });
+      }
+    }, 2000); 
+  });
+
+  // Tambahan: Hilangkan petunjuk manual jika aplikasi sudah terinstal (PWA mode)
+  window.addEventListener('appinstalled', (evt) => {
+    console.log('Aplikasi berhasil diinstal!');
+    document.getElementById('fullscreen-info').style.display = 'none';
+  });
+</script>
+
+    <script>
+  // 1. Memeriksa dukungan browser
+  if ('serviceWorker' in navigator) {
+    
+    // 2. Mendaftarkan file Service Worker (sw.js)
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => {
+        console.log('Pendaftaran berhasil!', reg);
+      })
+      .catch((err) => {
+        console.log('Pendaftaran gagal!', err);
+      });
+  }
+</script>
 </body>
 </html>
