@@ -6,12 +6,13 @@
     <title>Absensi Digital - Az-Zahro</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#2c3e50" media="(prefers-color-scheme: dark)">
+    
+    <meta name="theme-color" content="#2ecc71" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
     <link rel="apple-touch-icon" href="https://github.com/masrahmat-id/absensi/raw/main/icon-absensi-azzahro%20(1).png">
     <meta name="apple-mobile-web-app-title" content="Absensi Az-Zahro">
 
@@ -25,6 +26,15 @@
             --header-font-size: 0.9rem;
             --logo-size: 65px;
             --header-text-color: #2ecc71;
+        }
+
+        /* Mode Terang Otomatis untuk Bar Bawah & Body */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-body: #f0f2f5;
+                --bg-card: #ffffff;
+                --text-main: #1a1a1a;
+            }
         }
 
         [data-theme="light"] {
@@ -245,15 +255,10 @@
             <h3 style="color:var(--primary); margin-top:0;">Tentang Aplikasi</h3>
             <p style="font-size:13px; line-height:1.6; text-align: left;">
 "Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro hadir sebagai solusi inovatif 
-dalam mendukung digitalisasi pendidikan serta efisiensi administrasi sekolah.<br>
-Dengan fokus mentransformasi presensi konvensional menjadi sistem otomatis berbasis QR Code,
-aplikasi ini memastikan pendataan kehadiran berjalan cepat dan akurat.<br>
-Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi secara otomatis tanpa perlu rekapitulasi manual di akhir hari.<br>
-Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sekolah, yakni meningkatkan kualitas kegiatan belajar mengajar."
+dalam mendukung digitalisasi pendidikan serta efisiensi administrasi sekolah."
             </p>
             <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; font-size:12px; text-align:left;">
-                <p><div style="text-align: center; font-size:15px; font-weight: bold;">
-                IT DIGITALIZATION</div>
+                <p><div style="text-align: center; font-size:15px; font-weight: bold;">IT DIGITALIZATION</div>
                     <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 20px;">SMP ISLAM AZ-ZAHRO & SMK AZ-ZAHRO</div>
                     <strong>Created by ops:</strong> Rahmattullah<br></p>
                 <p><strong>Email:</strong> mas.rahmat.id@gmail.com</p>
@@ -263,11 +268,10 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
     </div>
 
     <script>
+        // --- LOGIKA ASLI TETAP DI SINI ---
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error: ${err.message}`);
-                });
+                document.documentElement.requestFullscreen().catch(err => { console.log(err.message); });
                 document.getElementById('fullscreen-info').style.display = 'none';
             }
         }
@@ -284,15 +288,8 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
         }
         setInterval(updateClock, 1000); updateClock();
 
-        function showAbout() {
-            document.getElementById('about-pop-up').style.display = 'block';
-            document.getElementById('about-overlay').style.display = 'block';
-        }
-
-        function closeAbout() {
-            document.getElementById('about-pop-up').style.display = 'none';
-            document.getElementById('about-overlay').style.display = 'none';
-        }
+        function showAbout() { document.getElementById('about-pop-up').style.display = 'block'; document.getElementById('about-overlay').style.display = 'block'; }
+        function closeAbout() { document.getElementById('about-pop-up').style.display = 'none'; document.getElementById('about-overlay').style.display = 'none'; }
 
         function applySettings() {
             const config = JSON.parse(localStorage.getItem('absensiConfig')) || {
@@ -351,7 +348,7 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
         (decodedText) => {
             if (isProcessing) return;
             const ketValue = document.getElementById('keterangan').value;
-            if (!ketValue || ketValue === "") {
+            if (!ketValue) {
                 const s = document.getElementById('status-kirim');
                 s.innerText = "✖ GAGAL: PILIH KETERANGAN DULU!";
                 s.style.backgroundColor = "#e74c3c";
@@ -373,36 +370,25 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
 
     <script>
         let deferredPrompt;
-
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker terdaftar: 1.0.1'))
-                .catch(err => console.log('SW Gagal:', err));
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW terdaftar: 1.0.1'));
             });
         }
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Pemicu otomatis dalam 2 detik agar user langsung disuruh instal
             setTimeout(() => {
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('User menginstal aplikasi');
-                        }
+                        if (choiceResult.outcome === 'accepted') console.log('Aplikasi Diinstal');
                         deferredPrompt = null;
                     });
                 }
             }, 2000); 
         });
-
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('Aplikasi sukses terinstal');
-            document.getElementById('fullscreen-info').style.display = 'none';
-        });
+        window.addEventListener('appinstalled', () => { document.getElementById('fullscreen-info').style.display = 'none'; });
     </script>
 </body>
 </html>
