@@ -13,19 +13,19 @@
       "src": "https://github.com/masrahmat-id/absensi/raw/main/icon-absensi-azzahro%20(1).png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any"
+      "purpose": "any" 
     },
     {
       "src": "https://github.com/masrahmat-id/absensi/raw/main/icon-absensi-azzahro%20(1).png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "maskable"
+      "purpose": "any"
     }
   ],
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#2ecc71",
-  "background_color": "#121212",
+  "background_color": "#ffffff",
   "scope": "/"
 }
