@@ -141,12 +141,10 @@
 
         .btn-close-modal { background: none; border: none; color: var(--text-main); font-size: 24px; font-weight: bold; cursor: pointer; }
         
-        /* Simpler Setting Items */
         .setting-item { 
             display: flex; justify-content: space-between; align-items: center; 
             margin-top: 8px; gap: 8px; font-size: 13px;
         }
-        .setting-item span { opacity: 0.9; }
         
         input[type="range"] { height: 4px; flex-grow: 1; }
         input[type="color"] { border: none; width: 30px; height: 25px; background: none; cursor: pointer; }
@@ -234,7 +232,7 @@
             <div class="section-title">Umum & Suara</div>
             <div class="setting-item">
                 <span>Notifikasi</span>
-                <select id="sound-choice" style="height: 28px; font-size: 12px; padding: 0 5px; border-radius: 5px; width: 60%;">
+                <select id="sound-choice" style="height: 28px; font-size: 12px; width: 60%;">
                     <option value="Notif01.mp3">Notif 01</option>
                     <option value="Notif02.mp3">Notif 02</option>
                     <option value="Notif03.mp3">Notif 03</option>
@@ -267,7 +265,7 @@
                     <span>Bawah</span><input type="color" id="grad-3" oninput="previewLayout()">
                 </div>
                 <div class="setting-item">
-                    <span>Arah Aliran</span>
+                    <span>Arah</span>
                     <select id="grad-dir" onchange="previewLayout()" style="height: 25px; font-size: 11px; width: 100px;">
                         <option value="180deg">Vertikal</option>
                         <option value="90deg">Horizontal</option>
@@ -276,7 +274,7 @@
                 </div>
             </div>
 
-            <div class="setting-item"><span>Mode Terang (Light)</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
+            <div class="setting-item"><span>Mode Terang</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
 
             <a href="https://azzahrolocare.github.io/rekap-absensi/" target="_blank" class="btn-database-trigger" id="btn-rekap">
                 REKAPITULASI PRESENSI SISWA
@@ -288,16 +286,19 @@
         </div>
 
         <div id="about-pop-up">
-            <h3 style="color:var(--primary); margin-top:0; font-size: 18px;">Tentang</h3>
-            <p style="font-size:12px; line-height:1.5; text-align: left; opacity: 0.9;">
-"Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro hadir sebagai solusi inovatif dalam mendukung digitalisasi pendidikan serta efisiensi administrasi sekolah."
+            <h3 style="color:var(--primary); margin-top:0; font-size: 18px;">Tentang Aplikasi</h3>
+            <p style="font-size:12px; line-height:1.6; text-align: left; opacity: 0.9;">
+"Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro hadir sebagai solusi inovatif dalam mendukung digitalisasi pendidikan serta efisiensi administrasi sekolah.<br><br>
+Dengan fokus mentransformasi presensi konvensional menjadi sistem otomatis berbasis QR Code, aplikasi ini memastikan pendataan kehadiran berjalan cepat dan akurat.<br><br>
+Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi secara otomatis tanpa perlu rekapitulasi manual di akhir hari."
             </p>
             <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; font-size:11px; text-align:left; border-left: 3px solid var(--primary);">
-                <p><strong>IT DIGITALIZATION:</strong> SMP Islam & SMK Az-Zahro<br>
-                <strong>Created by ops:</strong> Rahmattullah<br>
-                <strong>Email:</strong> mas.rahmat.id@gmail.com</p>
+                <div style="text-align: center; font-size:13px; font-weight: bold; color: var(--primary);">IT DIGITALIZATION</div>
+                <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 15px; font-size: 10px;">SMP ISLAM AZ-ZAHRO & SMK AZ-ZAHRO</div>
+                <p style="margin: 5px 0;"><strong>Created by ops:</strong> Rahmattullah</p>
+                <p style="margin: 5px 0;"><strong>Email:</strong> mas.rahmat.id@gmail.com</p>
             </div>
-            <button class="btn-save" style="margin-top:10px; padding:8px;" onclick="closeAbout()">TUTUP</button>
+            <button class="btn-save" style="margin-top:15px; padding:10px;" onclick="closeAbout()">TUTUP</button>
         </div>
     </div>
 
@@ -399,6 +400,7 @@
                 fontSize: document.getElementById('range-font').value,
                 textColor: document.getElementById('color-text').value,
                 bgColor: document.getElementById('color-bg').value,
+                useGrad: document.getElementById('gradient-toggle.checked'),
                 useGrad: document.getElementById('gradient-toggle').checked,
                 g1: document.getElementById('grad-1').value,
                 g2: document.getElementById('grad-2').value,
