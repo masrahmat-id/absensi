@@ -1,5 +1,5 @@
 {
-  "id": "/index.html",
+  "id": "index.html",
   "short_name": "Absensi Az-Zahro",
   "name": "Absensi Digital Az-Zahro",
   "description": "Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro",
@@ -33,5 +33,5 @@
   "orientation": "portrait",
   "theme_color": "#2ecc71",
   "background_color": "#121212",
-  "scope": "/"
+  "scope": "./"
 }
