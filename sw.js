@@ -9,7 +9,7 @@ const ASSETS_TO_CACHE = [
   './logo-smp-azzahro.png',
   './logo-smk-azzahro.png',
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
-  'https://github.com/masrahmat-id/absensi/raw/main/icon-absensi-azzahro%20(1).png'
+  './icon-apk-absensi-azzahro.png'
 ];
 
 self.addEventListener('install', (e) => {
