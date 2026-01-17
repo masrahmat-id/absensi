@@ -19,16 +19,16 @@
             --bg-body: #121212;
             --bg-gradient: none;
             --bg-card: #1e1e1e;
-            --text-main: #ffffff;
+            --text-main: #ffffff; /* Warna tulisan utama */
             --header-font-size: 0.9rem;
             --logo-size: 65px;
-            --header-text-color: #2ecc71;
+            --header-text-color: #2ecc71; /* Warna teks header khusus */
         }
 
         [data-theme="light"] {
             --bg-body: #f0f2f5;
             --bg-card: #ffffff;
-            --text-main: #1a1a1a;
+            /* Kita tidak lagi memaksa --text-main di sini agar tetap sesuai pilihan user */
         }
 
         html, body {
@@ -44,7 +44,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            color: var(--text-main); transition: all 0.4s ease;
+            color: var(--text-main); transition: background 0.4s ease;
         }
 
         .main-app {
@@ -129,7 +129,7 @@
             padding: 15px; border-radius: 20px; border: 2px solid var(--primary);
             z-index: 10000; width: 88%; max-width: 340px;
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            max-height: 85vh; overflow-y: auto;
+            max-height: 85vh; overflow-y: auto; color: var(--text-main);
         }
 
         #about-pop-up { z-index: 10002; text-align: center; }
@@ -248,9 +248,9 @@
             <div class="setting-item"><span>Font</span><input type="range" id="range-font" min="0.5" max="1.5" step="0.05" oninput="previewLayout()"></div>
             
             <div class="setting-item">
-                <span>Teks</span><input type="color" id="color-text" oninput="previewLayout()">
-                <span>Tema</span><input type="color" id="color-picker" oninput="previewLayout()">
-                <span>Latar</span><input type="color" id="color-bg" oninput="previewLayout()">
+                <span title="Warna Teks Utama">Teks</span><input type="color" id="color-text" oninput="previewLayout()">
+                <span title="Warna Garis & Tombol">Garis</span><input type="color" id="color-picker" oninput="previewLayout()">
+                <span title="Warna Latar Solid">Latar</span><input type="color" id="color-bg" oninput="previewLayout()">
             </div>
             
             <div class="setting-item" style="background: rgba(46, 204, 113, 0.1); padding: 5px; border-radius: 5px;">
@@ -265,7 +265,7 @@
                     <span>Bawah</span><input type="color" id="grad-3" oninput="previewLayout()">
                 </div>
                 <div class="setting-item">
-                    <span>Arah</span>
+                    <span>Arah Aliran</span>
                     <select id="grad-dir" onchange="previewLayout()" style="height: 25px; font-size: 11px; width: 100px;">
                         <option value="180deg">Vertikal</option>
                         <option value="90deg">Horizontal</option>
@@ -274,7 +274,7 @@
                 </div>
             </div>
 
-            <div class="setting-item"><span>Mode Terang</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
+            <div class="setting-item"><span>Mode Terang (Light)</span><input type="checkbox" id="theme-toggle" onchange="previewLayout()"></div>
 
             <a href="https://azzahrolocare.github.io/rekap-absensi/" target="_blank" class="btn-database-trigger" id="btn-rekap">
                 REKAPITULASI PRESENSI SISWA
@@ -335,7 +335,7 @@ Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi se
         function applySettings() {
             const config = JSON.parse(localStorage.getItem('absensiConfig')) || {
                 sound: 'Notif01.mp3', theme: 'dark', primary: '#2ecc71',
-                logoSize: '65', fontSize: '0.9', textColor: '#2ecc71', bgColor: '#121212',
+                logoSize: '65', fontSize: '0.9', textColor: '#ffffff', bgColor: '#121212',
                 useGrad: false, g1: '#121212', g2: '#1e1e1e', g3: '#000000', gDir: '180deg'
             };
             
@@ -344,7 +344,7 @@ Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi se
             document.getElementById('range-logo').value = config.logoSize;
             document.getElementById('range-font').value = config.fontSize;
             document.getElementById('color-text').value = config.textColor;
-            document.getElementById('color-bg').value = config.bgColor || '#121212';
+            document.getElementById('color-bg').value = config.bgColor;
             document.getElementById('theme-toggle').checked = (config.theme === 'light');
             document.getElementById('gradient-toggle').checked = config.useGrad;
             document.getElementById('grad-1').value = config.g1;
@@ -359,10 +359,14 @@ Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi se
             const useGrad = document.getElementById('gradient-toggle').checked;
             const primary = document.getElementById('color-picker').value;
             const bgSolid = document.getElementById('color-bg').value;
+            const textColor = document.getElementById('color-text').value;
             const gradSection = document.getElementById('gradient-controls');
 
+            // Set Warna Tulisan secara Independen
+            document.documentElement.style.setProperty('--text-main', textColor);
+            document.documentElement.style.setProperty('--header-text-color', primary); // Header mengikuti warna tema/garis agar kontras
+
             document.documentElement.style.setProperty('--primary', primary);
-            document.documentElement.style.setProperty('--header-text-color', document.getElementById('color-text').value);
             document.documentElement.style.setProperty('--logo-size', document.getElementById('range-logo').value + 'px');
             document.documentElement.style.setProperty('--header-font-size', document.getElementById('range-font').value + 'rem');
             
@@ -400,7 +404,6 @@ Melalui integrasi langsung dengan cloud storage, seluruh data tersinkronisasi se
                 fontSize: document.getElementById('range-font').value,
                 textColor: document.getElementById('color-text').value,
                 bgColor: document.getElementById('color-bg').value,
-                useGrad: document.getElementById('gradient-toggle.checked'),
                 useGrad: document.getElementById('gradient-toggle').checked,
                 g1: document.getElementById('grad-1').value,
                 g2: document.getElementById('grad-2').value,
