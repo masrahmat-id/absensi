@@ -11,6 +11,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="apple-touch-icon" href="https://github.com/masrahmat-id/absensi/raw/main/icon-absensi-azzahro%20(1).png">
+    <meta name="apple-mobile-web-app-title" content="Absensi Az-Zahro">
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
@@ -162,11 +165,12 @@
         }
         
         #keterangan option[disabled] {
-            display: none; /* Menghilangkan opsi dari daftar setelah diklik */
+            display: none;
         }
     </style>
 </head>
-<body data-theme="dark" onclick="toggleFullscreen()"> <div id="status-kirim"></div>
+<body data-theme="dark" onclick="toggleFullscreen()"> 
+    <div id="status-kirim"></div>
     <div id="about-overlay" class="overlay-about" onclick="closeAbout()"></div>
 
     <div class="main-app">
@@ -259,11 +263,10 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
     </div>
 
     <script>
-        // FUNGSI BARU UNTUK FULLSCREEN
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                    console.log(`Error: ${err.message}`);
                 });
                 document.getElementById('fullscreen-info').style.display = 'none';
             }
@@ -345,98 +348,61 @@ Inovasi ini memungkinkan tenaga pendidik untuk lebih fokus pada esensi utama sek
         applySettings();
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start({ facingMode: "environment" }, { fps: 25, qrbox: { width: 280, height: 280 }, aspectRatio: 0.75 }, 
-(decodedText) => {
-    if (isProcessing) return;
-
-    // --- VALIDASI KETERANGAN ---
-    const ketValue = document.getElementById('keterangan').value;
-    if (!ketValue || ketValue === "") {
-        const s = document.getElementById('status-kirim');
-        s.innerText = "✖ GAGAL: PILIH KETERANGAN DULU!";
-        s.style.backgroundColor = "#e74c3c"; // Warna merah untuk error
-        s.style.display = "block";
-        
-        // Mainkan suara peringatan jika perlu (opsional)
-        new Audio('error-sound.mp3').play().catch(() => {});
-
-        setTimeout(() => { 
-            s.style.display = "none"; 
-            s.style.backgroundColor = "var(--primary)"; // Kembalikan ke warna asli
-        }, 2000);
-        return; // Berhenti di sini, jangan kirim data
-    }
-    // ---------------------------
-
-    isProcessing = true;
-    document.getElementById('last-name-display').value = decodedText;
-    const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
-    new Audio(rawURL + config.sound).play().catch(() => {});
-    
-    // Kirim data hanya jika lolos validasi di atas
-    fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ketValue)}`, { method: 'GET', mode: 'no-cors' });
-    
-    const s = document.getElementById('status-kirim');
-    s.innerText = "✔ TERKIRIM: " + decodedText;
-    s.style.display = "block";
-    setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
-    }).catch(err => console.error(err));
+        (decodedText) => {
+            if (isProcessing) return;
+            const ketValue = document.getElementById('keterangan').value;
+            if (!ketValue || ketValue === "") {
+                const s = document.getElementById('status-kirim');
+                s.innerText = "✖ GAGAL: PILIH KETERANGAN DULU!";
+                s.style.backgroundColor = "#e74c3c";
+                s.style.display = "block";
+                setTimeout(() => { s.style.display = "none"; s.style.backgroundColor = "var(--primary)"; }, 2000);
+                return;
+            }
+            isProcessing = true;
+            document.getElementById('last-name-display').value = decodedText;
+            const config = JSON.parse(localStorage.getItem('absensiConfig')) || { sound: 'Notif01.mp3' };
+            new Audio(rawURL + config.sound).play().catch(() => {});
+            fetch(`${scriptURL}?nama=${encodeURIComponent(decodedText)}&keterangan=${encodeURIComponent(ketValue)}`, { method: 'GET', mode: 'no-cors' });
+            const s = document.getElementById('status-kirim');
+            s.innerText = "✔ TERKIRIM: " + decodedText;
+            s.style.display = "block";
+            setTimeout(() => { s.style.display = "none"; isProcessing = false; }, 2000);
+        }).catch(err => console.error(err));
     </script>
 
     <script>
-  // 1. Registrasi Service Worker Anda (sw.js)
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('SW terdaftar dengan versi: 1.0.1'))
-        .catch(err => console.log('SW Gagal:', err));
-    });
-  }
+        let deferredPrompt;
 
-  // 2. Logika Pemicu Instalasi Otomatis
-  let deferredPrompt;
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker terdaftar: 1.0.1'))
+                .catch(err => console.log('SW Gagal:', err));
+            });
+        }
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    // Mencegah browser menampilkan prompt default (agar kita bisa kontrol waktunya)
-    e.preventDefault();
-    deferredPrompt = e;
-
-    // Munculkan prompt otomatis setelah 2 detik halaman dimuat
-    setTimeout(() => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt(); // Tampilkan jendela instalasi
-        
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User menginstal aplikasi');
-          } else {
-            console.log('User menolak instalasi');
-          }
-          deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Pemicu otomatis dalam 2 detik agar user langsung disuruh instal
+            setTimeout(() => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User menginstal aplikasi');
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+            }, 2000); 
         });
-      }
-    }, 2000); 
-  });
 
-  // Tambahan: Hilangkan petunjuk manual jika aplikasi sudah terinstal (PWA mode)
-  window.addEventListener('appinstalled', (evt) => {
-    console.log('Aplikasi berhasil diinstal!');
-    document.getElementById('fullscreen-info').style.display = 'none';
-  });
-</script>
-
-    <script>
-  // 1. Memeriksa dukungan browser
-  if ('serviceWorker' in navigator) {
-    
-    // 2. Mendaftarkan file Service Worker (sw.js)
-    navigator.serviceWorker.register('./sw.js')
-      .then((reg) => {
-        console.log('Pendaftaran berhasil!', reg);
-      })
-      .catch((err) => {
-        console.log('Pendaftaran gagal!', err);
-      });
-  }
-</script>
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('Aplikasi sukses terinstal');
+            document.getElementById('fullscreen-info').style.display = 'none';
+        });
+    </script>
 </body>
 </html>
