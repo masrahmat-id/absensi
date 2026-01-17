@@ -2,6 +2,7 @@
   "id": "/index.html",
   "short_name": "Absensi Az-Zahro",
   "name": "Absensi Digital Az-Zahro",
+  "description": "Aplikasi Absensi Digital SMP Islam & SMK Az-Zahro",
   "icons": [
     {
       "src": "https://github.com/masrahmat-id/absensi/raw/main/icon-absensi-azzahro%20(1).png",
